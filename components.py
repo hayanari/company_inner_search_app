@@ -33,7 +33,7 @@ def display_select_mode():
             label="",
             options=[ct.ANSWER_MODE_1, ct.ANSWER_MODE_2],
             label_visibility="collapsed",
-            key="mode_radio"
+            key="mode_radio_unique"
         )
 
 
