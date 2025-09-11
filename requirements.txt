@@ -1,3 +1,4 @@
+pysqlite3-binary
 python-dotenv
 aiohappyeyeballs==2.4.4
 -c constraints.txt
