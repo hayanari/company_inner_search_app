@@ -1,3 +1,132 @@
+"""
+このファイルは、Webアプリのメイン処理が記述されたファイルです。
+"""
+
+############################################################
+# 0. 最初に Streamlit のページ設定
+############################################################
+import streamlit as st
+
+st.set_page_config(
+    page_title="Company Inner Search"
+)
+
+############################################################
+# 1. 標準ライブラリの読み込み
+############################################################
+import sys
+import sqlite3
+import os
+import logging
+import traceback
+from dotenv import load_dotenv
+
+# Python と SQLite の情報を表示（確認用）
+st.write("Python executable:", sys.executable)
+st.write("SQLite version:", sqlite3.sqlite_version)
+
+############################################################
+# 2. 環境変数・ディレクトリ準備
+############################################################
+load_dotenv()
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
+os.makedirs(".chroma", exist_ok=True)
+
+############################################################
+# 3. 自作モジュールの import
+############################################################
+import utils
+import components as cn
+from initialize import initialize
+import constants as ct
+
+############################################################
+# 4. ログ設定
+############################################################
+logger = logging.getLogger(ct.LOGGER_NAME)
+
+############################################################
+# 5. st.session_state 初期化
+############################################################
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+if "mode" not in st.session_state:
+    st.session_state.mode = ct.ANSWER_MODE_1
+if "initialized" not in st.session_state:
+    st.session_state.initialized = False
+
+############################################################
+# 6. 初期化処理
+############################################################
+try:
+    initialize()
+except Exception as e:
+    tb_str = traceback.format_exc()
+    error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
+    st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
+    st.stop()
+
+if not st.session_state.initialized:
+    st.session_state.initialized = True
+    logger.info(ct.APP_BOOT_MESSAGE)
+
+############################################################
+# 7. 初期表示
+############################################################
+cn.display_app_title()
+cn.display_select_mode()
+cn.display_initial_ai_message()
+
+############################################################
+# 8. 会話ログの表示
+############################################################
+try:
+    cn.display_conversation_log()
+except Exception as e:
+    logger.error(f"{ct.CONVERSATION_LOG_ERROR_MESSAGE}\n{e}")
+    st.error(utils.build_error_message(ct.CONVERSATION_LOG_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+    st.stop()
+
+############################################################
+# 9. チャット入力の受付
+############################################################
+chat_message = st.chat_input(ct.CHAT_INPUT_HELPER_TEXT)
+
+############################################################
+# 10. チャット送信時の処理
+############################################################
+if chat_message:
+    # 10-1. ユーザーメッセージ表示
+    logger.info({"message": chat_message, "application_mode": st.session_state.mode})
+    with st.chat_message("user"):
+        st.markdown(chat_message)
+
+    # 10-2. LLMからの回答取得
+    res_box = st.empty()
+    with st.spinner(ct.SPINNER_TEXT):
+        try:
+            llm_response = utils.get_llm_response(chat_message)
+        except Exception as e:
+            logger.error(f"{ct.GET_LLM_RESPONSE_ERROR_MESSAGE}\n{e}")
+            st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+            st.stop()
+
+    # 10-3. LLMからの回答表示
+    with st.chat_message("assistant"):
+        try:
+            if st.session_state.mode == ct.ANSWER_MODE_1:
+                content = cn.display_search_llm_response(llm_response)
+            elif st.session_state.mode == ct.ANSWER_MODE_2:
+                content = cn.display_contact_llm_response(llm_response)
+            logger.info({"message": content, "application_mode": st.session_state.mode})
+        except Exception as e:
+            logger.error(f"{ct.DISP_ANSWER_ERROR_MESSAGE}\n{e}")
+            st.error(utils.build_error_message(ct.DISP_ANSWER_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+            st.stop()
+
+    # 10-4. 会話ログに追加
+    st.session_state.messages.append({"role": "user", "content": chat_message})
+    st.session_state.messages.append({"role": "assistant", "content": content})
 import sys
 import sqlite3
 import streamlit as st
