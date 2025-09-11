@@ -1,17 +1,17 @@
 import sys
 sys.modules["sqlite3"] = __import__("pysqlite3")
+
 """
 このファイルは、Webアプリのメイン処理が記述されたファイルです。
 """
 
-############################################################
-# 0. 最初に Streamlit のページ設定
-############################################################
 import streamlit as st
-
 st.set_page_config(
     page_title="Company Inner Search"
 )
+
+import sys
+sys.modules["sqlite3"] = __import__("pysqlite3")
 
 ############################################################
 # 1. 標準ライブラリの読み込み
