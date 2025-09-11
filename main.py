@@ -162,10 +162,7 @@ import constants as ct
 ############################################################
 # 2. 設定関連
 ############################################################
-# ブラウザタブの表示文言を設定
-st.set_page_config(
-    page_title=ct.APP_NAME
-)
+
 
 st.write("Python executable:", sys.executable)
 st.write("SQLite version:", sqlite3.sqlite_version)
