@@ -1,14 +1,14 @@
 import sys
 sys.modules["sqlite3"] = __import__("pysqlite3")
 
-"""
-このファイルは、Webアプリのメイン処理が記述されたファイルです。
-"""
-
 import streamlit as st
 st.set_page_config(
     page_title="Company Inner Search"
 )
+
+"""
+このファイルは、Webアプリのメイン処理が記述されたファイルです。
+"""
 
 import sys
 sys.modules["sqlite3"] = __import__("pysqlite3")
