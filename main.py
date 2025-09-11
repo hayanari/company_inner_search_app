@@ -52,10 +52,11 @@ try:
 except Exception as e:
     # トレースバック情報を取得
     tb_str = traceback.format_exc()
-    # エラーログに詳細を出力
-    logger.error(f"{ct.INITIALIZE_ERROR_MESSAGE}\n{e}\n発生場所:\n{tb_str}")
-    # エラーメッセージを画面表示
-    st.error(utils.build_error_message(f"{ct.INITIALIZE_ERROR_MESSAGE}\n詳細はログ参照"), icon=ct.ERROR_ICON)
+    # 画面表示用メッセージを作成
+    error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
+    # エラーを1回だけ表示（アイコンも付けられる）
+    st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
+    # 後続処理を中断
     st.stop()
 
 # アプリ起動時のログファイルへの出力
