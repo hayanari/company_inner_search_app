@@ -1,3 +1,5 @@
+import sys
+sys.modules["sqlite3"] = __import__("pysqlite3")
 """
 このファイルは、Webアプリのメイン処理が記述されたファイルです。
 """
