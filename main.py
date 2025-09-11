@@ -45,15 +45,17 @@ if "mode" not in st.session_state:
 ############################################################
 # 3. 初期化処理
 ############################################################
+import traceback
 try:
-    # 初期化処理（「initialize.py」の「initialize」関数を実行）
+    # 初期化処理（initialize.pyのinitialize関数を実行）
     initialize()
 except Exception as e:
-    # エラーログの出力
-    logger.error(f"{ct.INITIALIZE_ERROR_MESSAGE}\n{e}")
-    # エラーメッセージの画面表示
-    st.error(utils.build_error_message(ct.INITIALIZE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
-    # 後続の処理を中断
+    # トレースバック情報を取得
+    tb_str = traceback.format_exc()
+    # エラーログに詳細を出力
+    logger.error(f"{ct.INITIALIZE_ERROR_MESSAGE}\n{e}\n発生場所:\n{tb_str}")
+    # エラーメッセージを画面表示
+    st.error(utils.build_error_message(f"{ct.INITIALIZE_ERROR_MESSAGE}\n詳細はログ参照"), icon=ct.ERROR_ICON)
     st.stop()
 
 # アプリ起動時のログファイルへの出力
