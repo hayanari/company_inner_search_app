@@ -32,7 +32,8 @@ def display_select_mode():
         st.session_state.mode = st.radio(
             label="",
             options=[ct.ANSWER_MODE_1, ct.ANSWER_MODE_2],
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            key="mode_radio"
         )
 
 
