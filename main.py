@@ -1,3 +1,9 @@
+import sys
+import sqlite3
+import streamlit as st
+
+st.write("Python executable:", sys.executable)
+st.write("SQLite version:", sqlite3.sqlite_version)
 """
 このファイルは、Webアプリのメイン処理が記述されたファイルです。
 """
