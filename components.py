@@ -21,20 +21,22 @@ def display_app_title():
     st.markdown(f"## {ct.APP_NAME}")
 
 
-def display_select_mode():
+def display_select_mode(key_prefix: str = "main"):
     """
     回答モードのラジオボタンを表示
     """
-    # 回答モードを選択する用のラジオボタンを表示
+    key = f"{key_prefix}_mode"
     col1, col2 = st.columns([100, 1])
     with col1:
-        # 「label_visibility="collapsed"」とすることで、ラジオボタンを非表示にする
-        st.session_state.mode = st.radio(
+        if key not in st.session_state:
+            st.session_state[key] = ct.ANSWER_MODE_1
+        mode = st.radio(
             label="",
             options=[ct.ANSWER_MODE_1, ct.ANSWER_MODE_2],
             label_visibility="collapsed",
-            key="mode_radio_unique"
+            key=key
         )
+    return mode
 
 
 def display_initial_ai_message():
