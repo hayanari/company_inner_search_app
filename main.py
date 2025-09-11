@@ -30,7 +30,13 @@ st.write("SQLite version:", sqlite3.sqlite_version)
 ############################################################
 # 2. 環境変数・ディレクトリ準備
 ############################################################
+os.environ["LANGCHAIN_TRACING_V2"] = "false"
+os.makedirs(".chroma", exist_ok=True)
+
 load_dotenv()
+# OPENAI_API_KEY2があればOPENAI_API_KEYにコピー
+if "OPENAI_API_KEY2" in os.environ:
+    os.environ["OPENAI_API_KEY"] = os.environ["OPENAI_API_KEY2"]
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 os.makedirs(".chroma", exist_ok=True)
 
