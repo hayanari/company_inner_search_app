@@ -1,53 +1,53 @@
 python-dotenv
 aiohappyeyeballs==2.4.4
-aiohttp==3.11.11
-aiosignal==1.3.2
-altair==5.5.0
-annotated-types==0.7.0
-anyio==4.8.0
-asgiref==3.8.1
-attrs==25.1.0
-backoff==2.2.1
-bcrypt==4.2.1
-beautifulsoup4==4.13.3
-blinker==1.9.0
-bs4==0.0.2
-build==1.2.2.post1
-cachetools==5.5.1
-certifi==2024.12.14
-charset-normalizer==3.4.1
-chroma-hnswlib==0.7.3
+-c constraints.txt
+
+# --- アプリの主要依存（直接 import する想定） ---
+streamlit==1.41.1
+
+# LangChain 一式
+langchain==0.2.1
+langchain-core==0.2.1
+langchain-community==0.2.1
+langchain-openai==0.1.7
+openai==1.60.2
+
+# ベクトル/DB
 chromadb==0.5.0
-click==8.1.8
-colorama==0.4.6
-coloredlogs==15.0.1
-dataclasses-json==0.6.7
-Deprecated==1.2.18
-distro==1.9.0
+
+# データ処理
+pandas==2.2.3
+numpy==1.26.4
+pyarrow==19.0.0
+
+# 生成/トークナイズ
+tiktoken==0.8.0
+tokenizers==0.21.0
+
+# 設定/モデル
+pydantic==2.10.6
+pydantic-settings==2.7.1
+python-dotenv>=1.0.1
+
+# I/O・ユーティリティ（必要に応じて取捨選択）
+requests==2.32.3
+aiohttp==3.11.11
+PyYAML==6.0.2
+lxml==5.3.1
+PyMuPDF==1.25.2
+pillow==11.1.0
+tqdm==4.67.1
+toml==0.10.2
+watchdog==6.0.0
+watchfiles==1.0.4
+beautifulsoup4==4.13.3
+bs4==0.0.2
+python-docx==1.1.2
 docx2txt==0.8
-durationpy==0.9
+
+#（FastAPI を使っていない場合は以下2行は削除OK）
 fastapi==0.115.7
-filelock==3.17.0
-flatbuffers==25.1.24
-frozenlist==1.5.0
-fsspec==2024.12.0
-gitdb==4.0.12
-GitPython==3.1.44
-google-auth==2.38.0
-googleapis-common-protos==1.66.0
-greenlet==3.1.1
-grpcio==1.70.0
-h11==0.14.0
-httpcore==1.0.7
-httptools==0.6.4
-httpx==0.28.1
-httpx-sse==0.4.0
-huggingface-hub==0.28.0
-humanfriendly==10.0
-idna==3.10
-importlib_metadata==8.5.0
-importlib_resources==6.5.2
-Jinja2==3.1.5
+uvicorn==0.34.0
 jiter==0.8.2
 jsonpatch==1.33
 jsonpointer==3.0.0

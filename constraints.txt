@@ -1,0 +1,9 @@
+# LangChain 0.2.1 系と衝突しやすいものを固定
+langsmith==0.1.20
+tenacity==8.2.3
+packaging==23.2
+
+# Streamlit/Rich 周りの整合用
+markdown-it-py==3.0.0
+pygments==2.19.1
+rich==13.9.4
