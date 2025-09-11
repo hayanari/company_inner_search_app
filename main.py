@@ -96,18 +96,9 @@ except Exception as e:
     st.stop()
 
 ############################################################
-# 9. チャット入力の受付
+# 9. チャット入力の受付（※このブロックは削除し、下の1箇所に統一）
 ############################################################
-chat_message = st.chat_input(ct.CHAT_INPUT_HELPER_TEXT)
-
-############################################################
-# 10. チャット送信時の処理
-############################################################
-if chat_message:
-    # 10-1. ユーザーメッセージ表示
-    logger.info({"message": chat_message, "application_mode": st.session_state.mode})
-    with st.chat_message("user"):
-        st.markdown(chat_message)
+# （ここは削除）
 
     # 10-2. LLMからの回答取得
     res_box = st.empty()
