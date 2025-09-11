@@ -1,9 +1,6 @@
 import sys
 import sqlite3
 import streamlit as st
-
-st.write("Python executable:", sys.executable)
-st.write("SQLite version:", sqlite3.sqlite_version)
 """
 このファイルは、Webアプリのメイン処理が記述されたファイルです。
 """
@@ -38,6 +35,9 @@ import constants as ct
 st.set_page_config(
     page_title=ct.APP_NAME
 )
+
+st.write("Python executable:", sys.executable)
+st.write("SQLite version:", sqlite3.sqlite_version)
 
 # ログ出力を行うためのロガーの設定
 logger = logging.getLogger(ct.LOGGER_NAME)
