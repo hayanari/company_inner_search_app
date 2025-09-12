@@ -1,3 +1,4 @@
+import os, streamlit as st
 import sys
 # pysqlite3 を sqlite3 として使う（Chroma 等の互換用）
 sys.modules["sqlite3"] = __import__("pysqlite3")
@@ -22,6 +23,9 @@ from dotenv import load_dotenv
 ############################################################
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
 os.makedirs(".chroma", exist_ok=True)
+
+# Streamlit CloudのSecretsを環境変数に反映
+os.environ.update(st.secrets)
 
 load_dotenv()
 # OPENAI_API_KEY2 があれば OPENAI_API_KEY にコピー
@@ -104,14 +108,31 @@ if user_text is not None and str(user_text).strip() != "":
     with st.chat_message("user"):
         st.markdown(user_text)
 
-    # 10-2. LLMからの回答取得
+     # 10-2. LLMからの回答取得
     res_box = st.empty()
     with st.spinner(ct.SPINNER_TEXT):
         try:
-            # ここでは user_text を渡す（chat_message でも可だが二重参照は避ける）
             llm_response = utils.get_llm_response(user_text)
         except Exception as e:
-            logger.error(f"{ct.GET_LLM_RESPONSE_ERROR_MESSAGE}\n{e}")
+            # 例外の中身を表示（デバッグ用）
+            import traceback, os
+            logger.exception(e)
+            tb_str = traceback.format_exc()
+            debug_on = os.getenv("APP_DEBUG", "0") == "1"
+
+            if debug_on:
+                with st.expander("エラー詳細（開発者向け）", expanded=True):
+                    st.code(f"{type(e).__name__}: {e}\n\n{tb_str}")
+                    key = os.getenv("OPENAI_API_KEY", "")
+                    masked = (key[:5] + "..." + key[-4:]) if key else "(未設定)"
+                    st.write("OPENAI_API_KEY:", masked)
+                    st.write("OPENAI_API_KEY2 存在:", "OPENAI_API_KEY2" in os.environ)
+                    try:
+                        import openai
+                        st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
+                    except Exception as imp_err:
+                        st.write("openai import error:", str(imp_err))
+
             st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
             st.stop()
 
