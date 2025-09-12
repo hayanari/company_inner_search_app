@@ -1,5 +1,5 @@
 import sys
-# pysqlite3 を sqlite3 として使う（Chroma 等で必要な環境向け）
+# pysqlite3 を sqlite3 として使う（Chroma 等の互換用）
 sys.modules["sqlite3"] = __import__("pysqlite3")
 
 import streamlit as st
@@ -50,6 +50,8 @@ if "mode" not in st.session_state:
     st.session_state.mode = ct.ANSWER_MODE_1
 if "initialized" not in st.session_state:
     st.session_state.initialized = False
+# 念のため：常に存在する形で chat_message を用意（旧コード参照防止）
+st.session_state.setdefault("last_user_text", "")
 
 ############################################################
 # 6. 初期化処理
@@ -86,22 +88,28 @@ except Exception as e:
 ############################################################
 # 9. チャット入力の受付
 ############################################################
-chat_message = st.chat_input(ct.CHAT_INPUT_HELPER_TEXT)
+# ここで必ず chat_message（ローカル変数）を定義し、空文字も許容しない
+user_text = st.chat_input(ct.CHAT_INPUT_HELPER_TEXT)
+chat_message = user_text  # 旧コードが chat_message を参照しても NameError にならないよう橋渡し
+# 参照用に保持
+if user_text is not None:
+    st.session_state.last_user_text = user_text
 
 ############################################################
 # 10. チャット送信時の処理
 ############################################################
-if chat_message:
+if user_text is not None and str(user_text).strip() != "":
     # 10-1. ユーザーメッセージの表示
-    logger.info({"message": chat_message, "application_mode": st.session_state.mode})
+    logger.info({"message": user_text, "application_mode": st.session_state.mode})
     with st.chat_message("user"):
-        st.markdown(chat_message)
+        st.markdown(user_text)
 
     # 10-2. LLMからの回答取得
     res_box = st.empty()
     with st.spinner(ct.SPINNER_TEXT):
         try:
-            llm_response = utils.get_llm_response(chat_message)
+            # ここでは user_text を渡す（chat_message でも可だが二重参照は避ける）
+            llm_response = utils.get_llm_response(user_text)
         except Exception as e:
             logger.error(f"{ct.GET_LLM_RESPONSE_ERROR_MESSAGE}\n{e}")
             st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
@@ -115,7 +123,6 @@ if chat_message:
             elif st.session_state.mode == ct.ANSWER_MODE_2:
                 content = cn.display_contact_llm_response(llm_response)
             else:
-                # 念のため未定義モード対策
                 content = cn.display_search_llm_response(llm_response)
 
             logger.info({"message": content, "application_mode": st.session_state.mode})
@@ -125,5 +132,5 @@ if chat_message:
             st.stop()
 
     # 10-4. 会話ログに追加
-    st.session_state.messages.append({"role": "user", "content": chat_message})
+    st.session_state.messages.append({"role": "user", "content": user_text})
     st.session_state.messages.append({"role": "assistant", "content": content})
