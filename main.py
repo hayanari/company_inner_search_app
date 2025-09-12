@@ -23,9 +23,7 @@ import logging
 import traceback
 from dotenv import load_dotenv
 
-# Python と SQLite の情報を表示（確認用）
-st.write("Python executable:", sys.executable)
-st.write("SQLite version:", sqlite3.sqlite_version)
+
 
 ############################################################
 # 2. 環境変数・ディレクトリ準備
