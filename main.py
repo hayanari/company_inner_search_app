@@ -194,30 +194,6 @@ if not "initialized" in st.session_state:
     logger.info(ct.APP_BOOT_MESSAGE)
 
 
-############################################################
-# 4. 初期表示
-############################################################
-# タイトル表示
-cn.display_app_title()
-
-# モード表示
-cn.display_select_mode(key_prefix="init_mode_unique")
-
-# AIメッセージの初期表示
-cn.display_initial_ai_message()
-
-
-############################################################
-# 5. 会話ログの表示
-############################################################
-try:
-    # 会話ログの表示
-    cn.display_conversation_log()
-except Exception as e:
-    # エラーログの出力
-    logger.error(f"{ct.CONVERSATION_LOG_ERROR_MESSAGE}\n{e}")
-    # エラーメッセージの画面表示
-    st.error(utils.build_error_message(ct.CONVERSATION_LOG_ERROR_MESSAGE), icon=ct.ERROR_ICON)
     # 後続の処理を中断
     st.stop()
 
