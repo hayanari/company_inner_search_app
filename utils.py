@@ -109,8 +109,8 @@ def get_llm_response(chat_message):
     chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
     # LLMへのリクエストとレスポンス取得
-    llm_response = chain.invoke({"input": chat_message, "chat_history": st.session_state.chat_history})
+    history = st.session_state.get("chat_history", [])
+    llm_response = chain.invoke({"input": chat_message, "chat_history": history})
     # LLMレスポンスを会話履歴に追加
-    st.session_state.chat_history.extend([HumanMessage(content=chat_message), llm_response["answer"]])
-
+    # （ここでのextendは不要なので削除）
     return llm_response

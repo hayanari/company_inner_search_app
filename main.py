@@ -54,8 +54,10 @@ if "mode" not in st.session_state:
     st.session_state.mode = ct.ANSWER_MODE_1
 if "initialized" not in st.session_state:
     st.session_state.initialized = False
+
 # 念のため：常に存在する形で chat_message を用意（旧コード参照防止）
 st.session_state.setdefault("last_user_text", "")
+st.session_state.setdefault("chat_history", [])
 
 ############################################################
 # 6. 初期化処理
@@ -153,5 +155,8 @@ if user_text is not None and str(user_text).strip() != "":
             st.stop()
 
     # 10-4. 会話ログに追加
+
     st.session_state.messages.append({"role": "user", "content": user_text})
     st.session_state.messages.append({"role": "assistant", "content": content})
+    # LangChainの chat_history 想定（(user, ai) のタプル）の形で追記
+    st.session_state.chat_history.append((user_text, content))
