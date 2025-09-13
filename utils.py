@@ -128,8 +128,14 @@ def get_llm_response(chat_message):
 
     # LLMへのリクエストとレスポンス取得
     st.write("[get_llm_response] before chain.invoke")
-    llm_response = chain.invoke({"input": chat_message, "chat_history": st.session_state.chat_history})
-    st.write(f"[get_llm_response] llm_response: {llm_response}")
+    import traceback
+    try:
+        llm_response = chain.invoke({"input": chat_message, "chat_history": st.session_state.chat_history})
+        st.write(f"[get_llm_response] llm_response: {llm_response}")
+    except Exception as e:
+        st.write(f"[get_llm_response] chain.invoke error: {e}")
+        st.write(traceback.format_exc())
+        raise
     # LLMレスポンスを会話履歴に追加
     st.session_state.chat_history.extend([HumanMessage(content=chat_message), llm_response["answer"]])
     st.write("[get_llm_response] before return")
