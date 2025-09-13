@@ -86,6 +86,7 @@ def get_llm_response(chat_message):
     Returns:
         LLMからの回答
     """
+    st.write("[get_llm_response] start")
     # LLMのオブジェクトを用意
     llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE)
 
@@ -126,8 +127,10 @@ def get_llm_response(chat_message):
     chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
 
     # LLMへのリクエストとレスポンス取得
+    st.write("[get_llm_response] before chain.invoke")
     llm_response = chain.invoke({"input": chat_message, "chat_history": st.session_state.chat_history})
+    st.write(f"[get_llm_response] llm_response: {llm_response}")
     # LLMレスポンスを会話履歴に追加
     st.session_state.chat_history.extend([HumanMessage(content=chat_message), llm_response["answer"]])
-
+    st.write("[get_llm_response] before return")
     return llm_response
