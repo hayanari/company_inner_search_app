@@ -110,6 +110,18 @@ if user_text is not None and str(user_text).strip() != "":
     with st.chat_message("user"):
         st.markdown(user_text)
 
+    # --- chat_history 既存履歴の型変換（旧形式→型付き） ---
+    hist = st.session_state.get("chat_history", [])
+    if hist and isinstance(hist[0], tuple) and len(hist[0]) == 2 \
+       and hist[0][0] not in ("human", "user", "ai", "assistant", "system"):
+        fixed = []
+        for u, a in hist:
+            if u:
+                fixed.append(("human", str(u)))
+            if a:
+                fixed.append(("ai", str(a)))
+        st.session_state.chat_history = fixed
+
      # 10-2. LLMからの回答取得
     res_box = st.empty()
     with st.spinner(ct.SPINNER_TEXT):
@@ -158,5 +170,8 @@ if user_text is not None and str(user_text).strip() != "":
 
     st.session_state.messages.append({"role": "user", "content": user_text})
     st.session_state.messages.append({"role": "assistant", "content": content})
+    # chat_historyには型付きタプルで追記
+    st.session_state.chat_history.append(("human", user_text))
+    st.session_state.chat_history.append(("ai", content))
     # LangChainの chat_history 想定（(user, ai) のタプル）の形で追記
     st.session_state.chat_history.append((user_text, content))

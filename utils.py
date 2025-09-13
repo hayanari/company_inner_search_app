@@ -1,3 +1,38 @@
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+def _to_base_messages(history):
+    """[(user, ai)] / [("human", ...), ("ai", ...)] / BaseMessage[] / [{"role":..,"content":..}] をBaseMessage[]に正規化"""
+    if not history:
+        return []
+    msgs = []
+    for item in history:
+        if isinstance(item, tuple) and len(item) == 2:
+            a, b = item
+            if a in ("human", "user"):
+                msgs.append(HumanMessage(content=str(b)))
+            elif a in ("ai", "assistant"):
+                msgs.append(AIMessage(content=str(b)))
+            elif a == "system":
+                msgs.append(SystemMessage(content=str(b)))
+            else:
+                # 旧形式 (user, ai) を検出したら分解
+                msgs.append(HumanMessage(content=str(a)))
+                msgs.append(AIMessage(content=str(b)))
+        elif isinstance(item, dict) and "role" in item and "content" in item:
+            role = item["role"]
+            content = item["content"]
+            if role in ("human", "user"):
+                msgs.append(HumanMessage(content=str(content)))
+            elif role in ("ai", "assistant"):
+                msgs.append(AIMessage(content=str(content)))
+            elif role == "system":
+                msgs.append(SystemMessage(content=str(content)))
+        else:
+            try:
+                _ = item.type; _ = item.content
+                msgs.append(item)
+            except Exception:
+                msgs.append(HumanMessage(content=str(item)))
+    return msgs
 """
 このファイルは、画面表示以外の様々な関数定義のファイルです。
 """
@@ -110,6 +145,7 @@ def get_llm_response(chat_message):
 
     # LLMへのリクエストとレスポンス取得
     history = st.session_state.get("chat_history", [])
+    history = _to_base_messages(history)
     llm_response = chain.invoke({"input": chat_message, "chat_history": history})
     # LLMレスポンスを会話履歴に追加
     # （ここでのextendは不要なので削除）
