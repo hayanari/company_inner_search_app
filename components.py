@@ -21,22 +21,19 @@ def display_app_title():
     st.markdown(f"## {ct.APP_NAME}")
 
 
-def display_select_mode(key_prefix: str = "main"):
+def display_select_mode():
     """
     回答モードのラジオボタンを表示
     """
-    key = f"{key_prefix}_mode"
+    # 回答モードを選択する用のラジオボタンを表示
     col1, col2 = st.columns([100, 1])
     with col1:
-        if key not in st.session_state:
-            st.session_state[key] = ct.ANSWER_MODE_1
-        mode = st.radio(
+        # 「label_visibility="collapsed"」とすることで、ラジオボタンを非表示にする
+        st.session_state.mode = st.radio(
             label="",
             options=[ct.ANSWER_MODE_1, ct.ANSWER_MODE_2],
-            label_visibility="collapsed",
-            key=key
+            label_visibility="collapsed"
         )
-    return mode
 
 
 def display_initial_ai_message():
@@ -146,12 +143,11 @@ def display_search_llm_response(llm_response):
     # LLMからのレスポンスに参照元情報が入っており、かつ「該当資料なし」が回答として返された場合
     if llm_response["context"] and llm_response["answer"] != ct.NO_DOC_MATCH_ANSWER:
 
-
         # ==========================================
-        # ユーザー入力値と最も関連性が高いメインドキュメントのありか・中身を表示
+        # ユーザー入力値と最も関連性が高いメインドキュメントのありかを表示
         # ==========================================
-        main_doc = llm_response["context"][0]
-        main_file_path = main_doc.metadata["source"]
+        # LLMからのレスポンス（辞書）の「context」属性の中の「0」に、最も関連性が高いドキュメント情報が入っている
+        main_file_path = llm_response["context"][0].metadata["source"]
 
         # 補足メッセージの表示
         main_message = "入力内容に関する情報は、以下のファイルに含まれている可能性があります。"
@@ -159,17 +155,15 @@ def display_search_llm_response(llm_response):
         
         # 参照元のありかに応じて、適したアイコンを取得
         icon = utils.get_source_icon(main_file_path)
-        # ページ番号が取得できた場合のみ、ページ番号を表示
-        if "page" in main_doc.metadata:
-            main_page_number = main_doc.metadata["page"]
+        # ページ番号が取得できた場合のみ、ページ番号を表示（ドキュメントによっては取得できない場合がある）
+        if "page" in llm_response["context"][0].metadata:
+            # ページ番号を取得
+            main_page_number = llm_response["context"][0].metadata["page"]
+            # 「メインドキュメントのファイルパス」と「ページ番号」を表示
             st.success(f"{main_file_path}", icon=icon)
         else:
+            # 「メインドキュメントのファイルパス」を表示
             st.success(f"{main_file_path}", icon=icon)
-
-        # ★ファイルの中身（先頭500文字）を折りたたみ表示
-        content_preview = main_doc.page_content[:500] if hasattr(main_doc, "page_content") else "(内容取得不可)"
-        with st.expander("ファイル内容を表示（抜粋）"):
-            st.code(content_preview)
 
         # ==========================================
         # ユーザー入力値と関連性が高いサブドキュメントのありかを表示
@@ -248,18 +242,19 @@ def display_search_llm_response(llm_response):
     
     # LLMからのレスポンスに、ユーザー入力値と関連性の高いドキュメント情報が入って「いない」場合
     else:
+        # contextに情報があればcontext内容をリストで抜粋表示
+        if llm_response.get("context"):
+            st.markdown("#### 🔍 検索ヒット文書一覧（AI回答が該当資料なしの場合も表示）")
+            for doc in llm_response["context"]:
+                st.expander(f"{doc.metadata.get('source', '')}").write(doc.page_content)
         # 関連ドキュメントが取得できなかった場合のメッセージ表示
         st.markdown(ct.NO_DOC_MATCH_MESSAGE)
 
         # 表示用の会話ログに格納するためのデータを用意
-        # - 「mode」: モード（「社内文書検索」or「社内問い合わせ」）
-        # - 「answer」: LLMからの回答
-        # - 「no_file_path_flg」: ファイルパスが取得できなかったことを示すフラグ（画面を再描画時の分岐に使用）
         content = {}
         content["mode"] = ct.ANSWER_MODE_1
         content["answer"] = ct.NO_DOC_MATCH_MESSAGE
         content["no_file_path_flg"] = True
-    
     return content
 
 
@@ -275,15 +270,6 @@ def display_contact_llm_response(llm_response):
     """
     # LLMからの回答を表示
     st.markdown(llm_response["answer"])
-
-    # ★参照元ドキュメントの内容も抜粋表示（先頭300文字ずつ、折りたたみ）
-    if "context" in llm_response and llm_response["context"]:
-        st.markdown("##### 参照文書の内容抜粋")
-        for doc in llm_response["context"]:
-            file_path = doc.metadata.get("source", "")
-            content_preview = doc.page_content[:300] if hasattr(doc, "page_content") else "(内容取得不可)"
-            with st.expander(f"{file_path} の内容を表示（抜粋）"):
-                st.code(content_preview)
 
     # ユーザーの質問・要望に適切な回答を行うための情報が、社内文書のデータベースに存在しなかった場合
     if llm_response["answer"] != ct.INQUIRY_NO_MATCH_ANSWER:
