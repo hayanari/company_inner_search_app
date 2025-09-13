@@ -33,7 +33,7 @@ if "OPENAI_API_KEY2" in os.environ:
 ############################################################
 import utils
 import components as cn
-from initialize import initialize
+import initialize
 import constants as ct
 
 ############################################################
