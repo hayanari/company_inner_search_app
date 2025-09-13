@@ -65,9 +65,9 @@ try:
 except Exception as e:
     tb_str = traceback.format_exc()
     error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
-        st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
-        st.write("traceback:")
-        st.write(traceback.format_exc())
+    st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
+    st.write("traceback:")
+    st.write(traceback.format_exc())
     st.stop()
 
 if not st.session_state.initialized:
