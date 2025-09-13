@@ -142,20 +142,33 @@ if user_text is not None and str(user_text).strip() != "":
             st.stop()
 
     # 10-4. アシスタントの回答表示（全文検索＋RAGハイブリッド）
+
     with st.chat_message("assistant"):
         try:
             # まず全文検索結果を表示
-            if keyword_results:
+            has_keyword = bool(keyword_results)
+            has_rag = False
+            if st.session_state.mode == ct.ANSWER_MODE_1:
+                content = cn.display_search_llm_response(llm_response)
+                has_rag = bool(content and content.strip())
+            elif st.session_state.mode == ct.ANSWER_MODE_2:
+                content = cn.display_contact_llm_response(llm_response)
+                has_rag = bool(content and content.strip())
+            else:
+                content = cn.display_search_llm_response(llm_response)
+                has_rag = bool(content and content.strip())
+
+            if has_keyword:
                 st.markdown("#### 🔍 キーワード一致による全文検索結果")
                 for doc in keyword_results:
                     st.expander(f"{doc.metadata.get('source', '')}").write(doc.page_content)
-            # RAGの回答も表示
-            if st.session_state.mode == ct.ANSWER_MODE_1:
-                content = cn.display_search_llm_response(llm_response)
-            elif st.session_state.mode == ct.ANSWER_MODE_2:
-                content = cn.display_contact_llm_response(llm_response)
-            else:
-                content = cn.display_search_llm_response(llm_response)
+
+            if has_rag:
+                st.markdown("#### 🤖 AIによる要約・回答")
+                st.markdown(content)
+            if not has_keyword and not has_rag:
+                st.warning("入力内容と関連する社内文書・AI回答が見つかりませんでした。入力内容を変更してください。", icon="⚠️")
+                content = "入力内容と関連する社内文書・AI回答が見つかりませんでした。"
             logger.info({"message": content, "application_mode": st.session_state.mode})
         except Exception as e:
             logger.error(f"{ct.DISP_ANSWER_ERROR_MESSAGE}\n{e}")
