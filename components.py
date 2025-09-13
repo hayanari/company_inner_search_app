@@ -146,11 +146,12 @@ def display_search_llm_response(llm_response):
     # LLMからのレスポンスに参照元情報が入っており、かつ「該当資料なし」が回答として返された場合
     if llm_response["context"] and llm_response["answer"] != ct.NO_DOC_MATCH_ANSWER:
 
+
         # ==========================================
-        # ユーザー入力値と最も関連性が高いメインドキュメントのありかを表示
+        # ユーザー入力値と最も関連性が高いメインドキュメントのありか・中身を表示
         # ==========================================
-        # LLMからのレスポンス（辞書）の「context」属性の中の「0」に、最も関連性が高いドキュメント情報が入っている
-        main_file_path = llm_response["context"][0].metadata["source"]
+        main_doc = llm_response["context"][0]
+        main_file_path = main_doc.metadata["source"]
 
         # 補足メッセージの表示
         main_message = "入力内容に関する情報は、以下のファイルに含まれている可能性があります。"
@@ -158,15 +159,16 @@ def display_search_llm_response(llm_response):
         
         # 参照元のありかに応じて、適したアイコンを取得
         icon = utils.get_source_icon(main_file_path)
-        # ページ番号が取得できた場合のみ、ページ番号を表示（ドキュメントによっては取得できない場合がある）
-        if "page" in llm_response["context"][0].metadata:
-            # ページ番号を取得
-            main_page_number = llm_response["context"][0].metadata["page"]
-            # 「メインドキュメントのファイルパス」と「ページ番号」を表示
+        # ページ番号が取得できた場合のみ、ページ番号を表示
+        if "page" in main_doc.metadata:
+            main_page_number = main_doc.metadata["page"]
             st.success(f"{main_file_path}", icon=icon)
         else:
-            # 「メインドキュメントのファイルパス」を表示
             st.success(f"{main_file_path}", icon=icon)
+
+        # ★ファイルの中身（先頭500文字）を抜粋表示
+        content_preview = main_doc.page_content[:500] if hasattr(main_doc, "page_content") else "(内容取得不可)"
+        st.markdown(f"```text\n{content_preview}\n```")
 
         # ==========================================
         # ユーザー入力値と関連性が高いサブドキュメントのありかを表示
@@ -272,6 +274,14 @@ def display_contact_llm_response(llm_response):
     """
     # LLMからの回答を表示
     st.markdown(llm_response["answer"])
+
+    # ★参照元ドキュメントの内容も抜粋表示（先頭300文字ずつ）
+    if "context" in llm_response and llm_response["context"]:
+        st.markdown("##### 参照文書の内容抜粋")
+        for doc in llm_response["context"]:
+            file_path = doc.metadata.get("source", "")
+            content_preview = doc.page_content[:300] if hasattr(doc, "page_content") else "(内容取得不可)"
+            st.markdown(f"**{file_path}**\n\n```text\n{content_preview}\n```")
 
     # ユーザーの質問・要望に適切な回答を行うための情報が、社内文書のデータベースに存在しなかった場合
     if llm_response["answer"] != ct.INQUIRY_NO_MATCH_ANSWER:
