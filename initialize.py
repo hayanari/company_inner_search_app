@@ -99,14 +99,6 @@ def initialize_session_id():
 
 
 def initialize_retriever():
-    # Cloud環境でのカレントディレクトリ・data/存在・中身をprint出力
-    print(f"★os.getcwd(): {os.getcwd()}")
-    print(f"★os.listdir('.'): {os.listdir('.')}")
-    data_path = ct.RAG_TOP_FOLDER_PATH
-    print(f"★data_path: {data_path}")
-    print(f"★os.path.exists(data_path): {os.path.exists(data_path)}")
-    if os.path.exists(data_path):
-        print(f"★os.listdir(data_path): {os.listdir(data_path)}")
     """
     画面読み込み時にRAGのRetriever（ベクターストアから検索するオブジェクト）を作成
     """
@@ -119,21 +111,16 @@ def initialize_retriever():
     
     # RAGの参照先となるデータソースの読み込み
     docs_all = load_data_sources()
-    print(f"★読み込んだ文書数: {len(docs_all)}")
-    for doc in docs_all:
-        meta = getattr(doc, 'metadata', {})
-        content = getattr(doc, 'page_content', '')
-        print(f"★文書: {meta} {content[:30]}...")
 
     # OSがWindowsの場合、Unicode正規化と、cp932（Windows用の文字コード）で表現できない文字を除去
     for doc in docs_all:
         doc.page_content = adjust_string(doc.page_content)
         for key in doc.metadata:
             doc.metadata[key] = adjust_string(doc.metadata[key])
-
+    
     # 埋め込みモデルの用意
     embeddings = OpenAIEmbeddings()
-
+    
     # チャンク分割用のオブジェクトを作成
     text_splitter = CharacterTextSplitter(
         chunk_size=500,
@@ -148,7 +135,7 @@ def initialize_retriever():
     db = Chroma.from_documents(splitted_docs, embedding=embeddings)
 
     # ベクターストアを検索するRetrieverの作成
-    st.session_state.retriever = db.as_retriever(search_kwargs={"k": 3})
+    st.session_state.retriever = db.as_retriever(search_kwargs={"k": 10})
 
 
 def initialize_session_state():
