@@ -217,6 +217,10 @@ def file_load(path, docs_all):
         # ファイルの拡張子に合ったdata loaderを使ってデータ読み込み
         loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
         docs = loader.load()
+        # 社員名簿.csvの場合は各行のテキスト先頭に「社員一覧:」を付与
+        if file_name == "社員名簿.csv":
+            for doc in docs:
+                doc.page_content = f"社員一覧: {doc.page_content}"
         docs_all.extend(docs)
 
 
