@@ -214,13 +214,27 @@ def file_load(path, docs_all):
 
     # 想定していたファイル形式の場合のみ読み込む
     if file_extension in ct.SUPPORTED_EXTENSIONS:
-        # ファイルの拡張子に合ったdata loaderを使ってデータ読み込み
         loader = ct.SUPPORTED_EXTENSIONS[file_extension](path)
         docs = loader.load()
-        # 社員名簿.csvの場合は各行のテキスト先頭に「社員一覧:」を付与
+        # 社員名簿.csvの場合は各行のテキスト先頭に「社員一覧:」＋部門名（あれば）を付与
         if file_name == "社員名簿.csv":
             for doc in docs:
-                doc.page_content = f"社員一覧: {doc.page_content}"
+                # 部門名を抽出（"部門"や"部署"などのカラムが含まれていれば）
+                dept = ""
+                # メタデータに部門情報があれば利用
+                if "部門" in doc.metadata:
+                    dept = doc.metadata["部門"]
+                elif "部署" in doc.metadata:
+                    dept = doc.metadata["部署"]
+                # テキストにも部門名が含まれていれば先頭に付与
+                if dept:
+                    doc.page_content = f"社員一覧: {dept}: {doc.page_content}"
+                else:
+                    doc.page_content = f"社員一覧: {doc.page_content}"
+        # 顧客について配下のファイルは「顧客一覧:」を付与
+        elif "顧客について" in path:
+            for doc in docs:
+                doc.page_content = f"顧客一覧: {doc.page_content}"
         docs_all.extend(docs)
 
 
