@@ -130,6 +130,7 @@ if user_text is not None and str(user_text).strip() != "":
     with st.spinner(ct.SPINNER_TEXT):
         try:
             llm_response = utils.get_llm_response(user_text)
+            st.write(f"llm_response: {llm_response}")
         except Exception as e:
             import traceback, os
             logger.exception(e)
