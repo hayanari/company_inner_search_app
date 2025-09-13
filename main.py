@@ -57,7 +57,7 @@ st.session_state.setdefault("last_user_text", "")
 # 6. 初期化処理
 ############################################################
 try:
-    initialize()
+
     # 全文検索用に全ドキュメントリストをセッションに保持
     if "docs_all" not in st.session_state:
         from initialize import load_data_sources
