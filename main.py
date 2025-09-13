@@ -167,13 +167,16 @@ if user_text is not None and str(user_text).strip() != "":
             has_rag = False
             if st.session_state.mode == ct.ANSWER_MODE_1:
                 content = cn.display_search_llm_response(llm_response)
-                has_rag = bool(content and content.strip())
             elif st.session_state.mode == ct.ANSWER_MODE_2:
                 content = cn.display_contact_llm_response(llm_response)
-                has_rag = bool(content and content.strip())
             else:
                 content = cn.display_search_llm_response(llm_response)
-                has_rag = bool(content and content.strip())
+            # contentがdict型の場合はstr型に変換してからstrip()
+            if isinstance(content, dict):
+                content_str = str(content)
+            else:
+                content_str = content
+            has_rag = bool(content_str and str(content_str).strip())
 
             if has_keyword:
                 st.markdown("#### 🔍 キーワード一致による全文検索結果")
