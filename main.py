@@ -1,5 +1,3 @@
-import os, streamlit as st
-import shutil
 import sys
 # pysqlite3 を sqlite3 として使う（Chroma 等の互換用）
 sys.modules["sqlite3"] = __import__("pysqlite3")
@@ -23,12 +21,7 @@ from dotenv import load_dotenv
 # 2. 環境変数・ディレクトリ準備
 ############################################################
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
-if os.path.exists(".chroma"):
-    shutil.rmtree(".chroma")
 os.makedirs(".chroma", exist_ok=True)
-
-# Streamlit CloudのSecretsを環境変数に反映
-os.environ.update(st.secrets)
 
 load_dotenv()
 # OPENAI_API_KEY2 があれば OPENAI_API_KEY にコピー
@@ -57,16 +50,18 @@ if "mode" not in st.session_state:
     st.session_state.mode = ct.ANSWER_MODE_1
 if "initialized" not in st.session_state:
     st.session_state.initialized = False
-
 # 念のため：常に存在する形で chat_message を用意（旧コード参照防止）
 st.session_state.setdefault("last_user_text", "")
-st.session_state.setdefault("chat_history", [])
 
 ############################################################
 # 6. 初期化処理
 ############################################################
 try:
     initialize()
+    # 全文検索用に全ドキュメントリストをセッションに保持
+    if "docs_all" not in st.session_state:
+        from initialize import load_data_sources
+        st.session_state.docs_all = load_data_sources()
 except Exception as e:
     tb_str = traceback.format_exc()
     error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
@@ -107,36 +102,30 @@ if user_text is not None:
 ############################################################
 # 10. チャット送信時の処理
 ############################################################
+
 if user_text is not None and str(user_text).strip() != "":
     # 10-1. ユーザーメッセージの表示
     logger.info({"message": user_text, "application_mode": st.session_state.mode})
     with st.chat_message("user"):
         st.markdown(user_text)
 
-    # --- chat_history 既存履歴の型変換（旧形式→型付き） ---
-    hist = st.session_state.get("chat_history", [])
-    if hist and isinstance(hist[0], tuple) and len(hist[0]) == 2 \
-       and hist[0][0] not in ("human", "user", "ai", "assistant", "system"):
-        fixed = []
-        for u, a in hist:
-            if u:
-                fixed.append(("human", str(u)))
-            if a:
-                fixed.append(("ai", str(a)))
-        st.session_state.chat_history = fixed
+    # 10-2. 全文検索（キーワード一致）
+    keyword_results = []
+    try:
+        keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=10)
+    except Exception as e:
+        logger.warning(f"全文検索エラー: {e}")
 
-     # 10-2. LLMからの回答取得
+    # 10-3. LLMからの回答取得（RAG）
     res_box = st.empty()
     with st.spinner(ct.SPINNER_TEXT):
         try:
             llm_response = utils.get_llm_response(user_text)
         except Exception as e:
-            # 例外の中身を表示（デバッグ用）
             import traceback, os
             logger.exception(e)
             tb_str = traceback.format_exc()
             debug_on = os.getenv("APP_DEBUG", "0") == "1"
-
             if debug_on:
                 with st.expander("エラー詳細（開発者向け）", expanded=True):
                     st.code(f"{type(e).__name__}: {e}\n\n{tb_str}")
@@ -149,32 +138,30 @@ if user_text is not None and str(user_text).strip() != "":
                         st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
                     except Exception as imp_err:
                         st.write("openai import error:", str(imp_err))
-
             st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
             st.stop()
 
-    # 10-3. LLMからの回答表示
+    # 10-4. アシスタントの回答表示（全文検索＋RAGハイブリッド）
     with st.chat_message("assistant"):
         try:
+            # まず全文検索結果を表示
+            if keyword_results:
+                st.markdown("#### 🔍 キーワード一致による全文検索結果")
+                for doc in keyword_results:
+                    st.expander(f"{doc.metadata.get('source', '')}").write(doc.page_content)
+            # RAGの回答も表示
             if st.session_state.mode == ct.ANSWER_MODE_1:
                 content = cn.display_search_llm_response(llm_response)
             elif st.session_state.mode == ct.ANSWER_MODE_2:
                 content = cn.display_contact_llm_response(llm_response)
             else:
                 content = cn.display_search_llm_response(llm_response)
-
             logger.info({"message": content, "application_mode": st.session_state.mode})
         except Exception as e:
             logger.error(f"{ct.DISP_ANSWER_ERROR_MESSAGE}\n{e}")
             st.error(utils.build_error_message(ct.DISP_ANSWER_ERROR_MESSAGE), icon=ct.ERROR_ICON)
             st.stop()
 
-    # 10-4. 会話ログに追加
-
+    # 10-5. 会話ログに追加
     st.session_state.messages.append({"role": "user", "content": user_text})
     st.session_state.messages.append({"role": "assistant", "content": content})
-    # chat_historyには型付きタプルで追記
-    st.session_state.chat_history.append(("human", user_text))
-    st.session_state.chat_history.append(("ai", content))
-    # LangChainの chat_history 想定（(user, ai) のタプル）の形で追記
-    st.session_state.chat_history.append((user_text, content))
