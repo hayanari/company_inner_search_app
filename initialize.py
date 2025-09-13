@@ -1,3 +1,7 @@
+# chat_historyの初期化（未定義なら空リストで初期化）
+import streamlit as st
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
 """
 このファイルは、最初の画面読み込み時にのみ実行される初期化処理が記述されたファイルです。
 """
