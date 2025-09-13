@@ -99,6 +99,14 @@ def initialize_session_id():
 
 
 def initialize_retriever():
+    # Cloud環境でのカレントディレクトリ・data/存在・中身をprint出力
+    print(f"★os.getcwd(): {os.getcwd()}")
+    print(f"★os.listdir('.'): {os.listdir('.')}")
+    data_path = ct.RAG_TOP_FOLDER_PATH
+    print(f"★data_path: {data_path}")
+    print(f"★os.path.exists(data_path): {os.path.exists(data_path)}")
+    if os.path.exists(data_path):
+        print(f"★os.listdir(data_path): {os.listdir(data_path)}")
     """
     画面読み込み時にRAGのRetriever（ベクターストアから検索するオブジェクト）を作成
     """
