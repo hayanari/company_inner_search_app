@@ -1,4 +1,5 @@
 import os, streamlit as st
+import shutil
 import sys
 # pysqlite3 を sqlite3 として使う（Chroma 等の互換用）
 sys.modules["sqlite3"] = __import__("pysqlite3")
@@ -22,6 +23,8 @@ from dotenv import load_dotenv
 # 2. 環境変数・ディレクトリ準備
 ############################################################
 os.environ["LANGCHAIN_TRACING_V2"] = "false"
+if os.path.exists(".chroma"):
+    shutil.rmtree(".chroma")
 os.makedirs(".chroma", exist_ok=True)
 
 # Streamlit CloudのSecretsを環境変数に反映
