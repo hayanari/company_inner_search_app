@@ -88,8 +88,9 @@ def get_llm_response(chat_message):
     """
     st.write("[get_llm_response] start")
     st.write("get_llm_response called")
-    # LLMのオブジェクトを用意
+    st.write("before llm init")
     llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE)
+    st.write("after llm init")
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのプロンプトテンプレートを作成
     question_generator_template = ct.SYSTEM_PROMPT_CREATE_INDEPENDENT_TEXT
@@ -118,14 +119,19 @@ def get_llm_response(chat_message):
     )
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのRetrieverを作成
+    st.write("before history_aware_retriever init")
     history_aware_retriever = create_history_aware_retriever(
         llm, st.session_state.retriever, question_generator_prompt
     )
+    st.write("after history_aware_retriever init")
 
     # LLMから回答を取得する用のChainを作成
+    st.write("before question_answer_chain init")
     question_answer_chain = create_stuff_documents_chain(llm, question_answer_prompt)
-    # 「RAG x 会話履歴の記憶機能」を実現するためのChainを作成
+    st.write("after question_answer_chain init")
+    st.write("before chain init")
     chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
+    st.write("after chain init")
 
     # LLMへのリクエストとレスポンス取得
     st.write("[get_llm_response] before chain.invoke")
