@@ -65,7 +65,9 @@ try:
 except Exception as e:
     tb_str = traceback.format_exc()
     error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
-    st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
+        st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
+        st.write("traceback:")
+        st.write(traceback.format_exc())
     st.stop()
 
 if not st.session_state.initialized:
@@ -145,7 +147,9 @@ if user_text is not None and str(user_text).strip() != "":
                         st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
                     except Exception as imp_err:
                         st.write("openai import error:", str(imp_err))
-            st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+                st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+                st.write("traceback:")
+                st.write(traceback.format_exc())
             st.stop()
 
     # 10-4. アシスタントの回答表示（全文検索＋RAGハイブリッド）
