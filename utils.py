@@ -87,6 +87,7 @@ def get_llm_response(chat_message):
         LLMからの回答
     """
     st.write("[get_llm_response] start")
+    st.write("get_llm_response called")
     # LLMのオブジェクトを用意
     llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE)
 
@@ -128,6 +129,13 @@ def get_llm_response(chat_message):
 
     # LLMへのリクエストとレスポンス取得
     st.write("[get_llm_response] before chain.invoke")
+    st.write(f"chat_message: {chat_message}")
+    st.write(f"chat_history len: {len(st.session_state.chat_history) if hasattr(st.session_state, 'chat_history') else 'N/A'}")
+    st.write(f"chat_history sample: {st.session_state.chat_history[:2] if hasattr(st.session_state, 'chat_history') else 'N/A'}")
+    if hasattr(st.session_state, 'retriever') and hasattr(st.session_state.retriever, 'docs'):
+        st.write(f"context docs len: {len(st.session_state.retriever.docs)}")
+        st.write(f"context docs sample: {st.session_state.retriever.docs[:1]}")
+    st.stop()
     import traceback
     try:
         llm_response = chain.invoke({"input": chat_message, "chat_history": st.session_state.chat_history})

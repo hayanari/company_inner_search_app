@@ -130,6 +130,7 @@ if user_text is not None and str(user_text).strip() != "":
     with st.spinner(ct.SPINNER_TEXT):
         try:
             st.write("before get_llm_response")
+            st.write("call get_llm_response")
             llm_response = utils.get_llm_response(user_text)
             st.write("after get_llm_response")
             if llm_response is None or (isinstance(llm_response, str) and llm_response.strip() == ""):
