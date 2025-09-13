@@ -166,9 +166,10 @@ def display_search_llm_response(llm_response):
         else:
             st.success(f"{main_file_path}", icon=icon)
 
-        # ★ファイルの中身（先頭500文字）を抜粋表示
+        # ★ファイルの中身（先頭500文字）を折りたたみ表示
         content_preview = main_doc.page_content[:500] if hasattr(main_doc, "page_content") else "(内容取得不可)"
-        st.markdown(f"```text\n{content_preview}\n```")
+        with st.expander("ファイル内容を表示（抜粋）"):
+            st.code(content_preview)
 
         # ==========================================
         # ユーザー入力値と関連性が高いサブドキュメントのありかを表示
@@ -275,13 +276,14 @@ def display_contact_llm_response(llm_response):
     # LLMからの回答を表示
     st.markdown(llm_response["answer"])
 
-    # ★参照元ドキュメントの内容も抜粋表示（先頭300文字ずつ）
+    # ★参照元ドキュメントの内容も抜粋表示（先頭300文字ずつ、折りたたみ）
     if "context" in llm_response and llm_response["context"]:
         st.markdown("##### 参照文書の内容抜粋")
         for doc in llm_response["context"]:
             file_path = doc.metadata.get("source", "")
             content_preview = doc.page_content[:300] if hasattr(doc, "page_content") else "(内容取得不可)"
-            st.markdown(f"**{file_path}**\n\n```text\n{content_preview}\n```")
+            with st.expander(f"{file_path} の内容を表示（抜粋）"):
+                st.code(content_preview)
 
     # ユーザーの質問・要望に適切な回答を行うための情報が、社内文書のデータベースに存在しなかった場合
     if llm_response["answer"] != ct.INQUIRY_NO_MATCH_ANSWER:
