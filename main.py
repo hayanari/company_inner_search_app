@@ -112,7 +112,7 @@ if user_text is not None and str(user_text).strip() != "":
     # 10-2. 全文検索（キーワード一致）
     keyword_results = []
     try:
-        keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=5)
+    keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=3)
     except Exception as e:
         logger.warning(f"全文検索エラー: {e}")
 
