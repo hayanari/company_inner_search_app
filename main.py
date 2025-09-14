@@ -75,9 +75,8 @@ if not st.session_state.initialized:
 ############################################################
 # 7. 初期表示
 ############################################################
-purpose = cn.display_sidebar()
+cn.display_sidebar()
 cn.display_app_title()
-st.session_state.mode = cn.display_select_mode()
 cn.display_initial_ai_message()
 
 ############################################################

@@ -1,3 +1,11 @@
+
+############################################################
+# ライブラリの読み込み
+############################################################
+import streamlit as st
+import utils
+import constants as ct
+
 def display_file_with_page(file_path, icon=None, page_number=None, style='success'):
     """
     ファイルパス＋ページ番号を一貫したUIで表示
@@ -12,39 +20,28 @@ def display_file_with_page(file_path, icon=None, page_number=None, style='succes
         st.info(label, icon=icon)
     else:
         st.markdown(label)
+
 def display_sidebar():
     """
-    サイドバーUI（利用目的・説明・入力例）
+    サイドバーの表示（問題3用）
     """
-    st.sidebar.title("利用目的")
-    purpose = st.sidebar.radio("", ["社内文書検索", "社内問い合わせ"])
-    st.sidebar.markdown("""
-    <div style='margin-bottom: 1em;'></div>
-    <b>【「社内文書検索」を選択した場合】</b>
-    <div style='background:#f5f7fa;padding:8px;border-radius:6px;margin-bottom:0.5em;'>
-    入力内容と関連性が高い社内文書のありかを検索できます。
-    </div>
-    <b>【入力例】</b><br>
-    社員の育成方針に関するMTGの議事録
-    <div style='margin-bottom: 1em;'></div>
-    <b>【「社内問い合わせ」を選択した場合】</b>
-    <div style='background:#f5f7fa;padding:8px;border-radius:6px;margin-bottom:0.5em;'>
-    質問・要望に対して、社内文書の情報をもとに回答を得られます。
-    </div>
-    <b>【入力例】</b><br>
-    人事部に所属している従業員情報を一覧化して
-    """, unsafe_allow_html=True)
-    return purpose
-"""
-このファイルは、画面表示に特化した関数定義のファイルです。
-"""
-
-############################################################
-# ライブラリの読み込み
-############################################################
-import streamlit as st
-import utils
-import constants as ct
+    with st.sidebar:
+        st.markdown("## 利用目的")
+        # 回答モード選択
+        st.session_state.mode = st.radio(
+            label="",
+            options=[ct.ANSWER_MODE_1, ct.ANSWER_MODE_2],
+            label_visibility="collapsed"
+        )
+        st.divider()
+        # 社内文書検索の説明
+        st.markdown("**【社内文書検索】**")
+        st.info("入力内容と関連性が高い社内文書のありかを検索できます。")
+        st.code("【入力例】\n社員の育成方針に関するMTGの議事録", wrap_lines=True, language=None)
+        # 社内問い合わせの説明
+        st.markdown("**【社内問い合わせ】**")
+        st.info("質問・要望に対して、社内文書の情報をもとに回答を得られます。")
+        st.code("【入力例】\n人事部に所属している従業員情報を一覧化して", wrap_lines=True, language=None)
 
 
 ############################################################

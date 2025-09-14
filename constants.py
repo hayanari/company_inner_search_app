@@ -21,7 +21,7 @@ SUPPORTED_EXTENSIONS: Dict[str, Callable] = {
     ".pdf": PyMuPDFLoader,
     ".docx": Docx2txtLoader,
     ".csv": csv_loader_utf8,
-    ".txt": TextLoader
+    ".txt": lambda path: TextLoader(path, encoding="utf-8")
 }
 
 
