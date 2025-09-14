@@ -38,7 +38,7 @@ def render_hr_list_fixed():
     cols = [c for c in ["社員ID", "氏名", "部署", "役職", "メール", "__source"] if c in df_hr.columns]
     df_hr = df_hr[cols].drop_duplicates()
 
-    st.write("### 人事部に所属している従業員一覧（フォールバック抽出）")
+    # st.write("### 人事部に所属している従業員一覧（フォールバック抽出）")
     if df_hr.empty:
         st.info("人事部のレコードが見つかりませんでした。CSVの内容をご確認ください。")
     else:
@@ -52,7 +52,7 @@ def render_hr_list_fixed():
     return df_hr
 def crash_report(label, fn):
     import streamlit as st, traceback
-    st.write(f"checkpoint: {label}")
+    # st.write(f"checkpoint: {label}")
     try:
         return fn()
     except Exception as e:
@@ -152,8 +152,8 @@ def get_llm_response(chat_message):
         return hist
 
     chat_history = get_chat_history_from_session()
-    st.write(f"chat_history len: {len(chat_history)}")
-    st.write(f"chat_history sample: {chat_history[:2]}")
+    # st.write(f"chat_history len: {len(chat_history)}")
+    # st.write(f"chat_history sample: {chat_history[:2]}")
     """
     LLMからの回答取得
 
@@ -163,12 +163,12 @@ def get_llm_response(chat_message):
     Returns:
         LLMからの回答
     """
-    st.write("[get_llm_response] start")
-    st.write("get_llm_response called")
-    st.write("before llm init")
+    # st.write("[get_llm_response] start")
+    # st.write("get_llm_response called")
+    # st.write("before llm init")
     llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE)
-    st.write("after llm init")
-    st.write("checkpoint: after llm init")
+    # st.write("after llm init")
+    # st.write("checkpoint: after llm init")
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのプロンプトテンプレートを作成
     # LangChain公式推奨の配線でプロンプトを作成
@@ -193,32 +193,32 @@ def get_llm_response(chat_message):
     )
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのRetrieverを作成
-    st.write("before history_aware_retriever init")
+    # st.write("before history_aware_retriever init")
     print("before history_aware_retriever init")
-    st.write(f"llm is None: {llm is None}")
+    # st.write(f"llm is None: {llm is None}")
     print(f"llm is None: {llm is None}")
     try:
-        st.write(f"retriever is None: {st.session_state.retriever is None}")
+    # st.write(f"retriever is None: {st.session_state.retriever is None}")
         print(f"retriever is None: {st.session_state.retriever is None}")
     except Exception as e:
-        st.write(f"retrieverチェック例外: {e}")
+    # st.write(f"retrieverチェック例外: {e}")
         print(f"retrieverチェック例外: {e}")
     try:
-        st.write(f"question_generator_prompt is None: {question_generator_prompt is None}")
+    # st.write(f"question_generator_prompt is None: {question_generator_prompt is None}")
         print(f"question_generator_prompt is None: {question_generator_prompt is None}")
     except Exception as e:
-        st.write(f"promptチェック例外: {e}")
+    # st.write(f"promptチェック例外: {e}")
         print(f"promptチェック例外: {e}")
     # create_history_aware_retriever呼び出しを一時的にコメントアウト
     # デバッグ出力はここまで、本処理を有効化
-    st.write(f"retriever type: {type(st.session_state.retriever)}")
-    st.write(f"retriever sample: {str(st.session_state.retriever)[:300]}")
-    st.write(f"question_generator_prompt type: {type(question_generator_prompt)}")
-    st.write(f"question_generator_prompt sample: {str(question_generator_prompt)[:300]}")
+    # st.write(f"retriever type: {type(st.session_state.retriever)}")
+    # st.write(f"retriever sample: {str(st.session_state.retriever)[:300]}")
+    # st.write(f"question_generator_prompt type: {type(question_generator_prompt)}")
+    # st.write(f"question_generator_prompt sample: {str(question_generator_prompt)[:300]}")
     history_aware_retriever = create_history_aware_retriever(
         llm, st.session_state.retriever, question_generator_prompt
     )
-    st.write("after history_aware_retriever init")
+    # st.write("after history_aware_retriever init")
 
     # --- LangChain公式推奨の配線 ---
     from langchain_core.prompts import ChatPromptTemplate
@@ -256,7 +256,7 @@ def get_llm_response(chat_message):
     )
 
     # LLMへのリクエストとレスポンス取得
-    st.write("[get_llm_response] before chain.invoke")
+    # st.write("[get_llm_response] before chain.invoke")
     st.write(f"chat_message: {chat_message}")
     st.write(f"chat_history len: {len(chat_history)}")
     st.write(f"chat_history sample: {chat_history[:2]}")
