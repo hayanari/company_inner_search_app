@@ -56,12 +56,10 @@ st.session_state.setdefault("last_user_text", "")
 ############################################################
 # 6. 初期化処理
 ############################################################
-try:
 
-    # 全文検索用に全ドキュメントリストをセッションに保持
-    if "docs_all" not in st.session_state:
-        from initialize import load_data_sources
-        st.session_state.docs_all = load_data_sources()
+# --- ここで必ず初期化 ---
+try:
+    initialize.initialize()
 except Exception as e:
     tb_str = traceback.format_exc()
     error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
