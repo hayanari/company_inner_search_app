@@ -137,9 +137,9 @@ if user_text is not None and str(user_text).strip() != "":
         st.write("call get_llm_response")
         llm_response = utils.get_llm_response(user_text)
         st.write("after get_llm_response")
-            # --- デバッグ: LLMレスポンスのcontext内metadataを出力 ---
-            if llm_response and isinstance(llm_response, dict) and "context" in llm_response and llm_response["context"]:
-                st.write("[DEBUG] llm_response context[0] metadata:", llm_response["context"][0].metadata)
+        # --- デバッグ: LLMレスポンスのcontext内metadataを出力 ---
+        if llm_response and isinstance(llm_response, dict) and "context" in llm_response and llm_response["context"]:
+            st.write("[DEBUG] llm_response context[0] metadata:", llm_response["context"][0].metadata)
     except Exception:
         st.write("llm_response error, fallback to fixed list")
         utils.render_hr_list_fixed()
