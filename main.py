@@ -179,7 +179,7 @@ if user_text is not None and str(user_text).strip() != "":
                 # st.write("traceback:")
                 # st.write(traceback.format_exc())
             else:
-                pass
+                st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
             st.stop()
 
     # 10-4. アシスタントの回答表示（全文検索＋RAGハイブリッド）
