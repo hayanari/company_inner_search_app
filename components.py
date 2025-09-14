@@ -125,9 +125,8 @@ def display_conversation_log():
                             for sub_choice in message["content"]["sub_choices"]:
                                 # 参照元のありかに応じて、適したアイコンを取得
                                 icon = utils.get_source_icon(sub_choice['source'])
-                                # 参照元ドキュメントのページ番号が取得できた場合にのみ、ページ番号を表示
                                 if "page_number" in sub_choice:
-                                    st.info(f"{sub_choice['source']}", icon=icon)
+                                    st.info(f"{sub_choice['source']}（ページNo.{sub_choice['page_number']}）", icon=icon)
                                 else:
                                     st.info(f"{sub_choice['source']}", icon=icon)
                     # ファイルのありかの情報が取得できなかった場合、LLMからの回答のみ表示
@@ -232,8 +231,6 @@ def display_search_llm_response(llm_response):
             for sub_choice in sub_choices:
                 # 参照元のありかに応じて、適したアイコンを取得
                 icon = utils.get_source_icon(sub_choice['source'])
-                # ページ番号が取得できない場合のための分岐処理
-                # ページ番号がある場合はファイルパス＋ページ番号を表示、なければファイルパスのみ
                 if 'page_number' in sub_choice:
                     st.info(f"{sub_choice['source']}（ページNo.{sub_choice['page_number']}）", icon=icon)
                 else:
