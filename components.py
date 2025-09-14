@@ -13,7 +13,7 @@ def display_file_with_page(file_path, icon=None, page_number=None, style='succes
     """
     label = f"{file_path}"
     if page_number is not None:
-        label += f"（ページNo.{page_number}")
+        label += f"（ページNo.{page_number}）"
     if style == 'success':
         st.success(label, icon=icon)
     elif style == 'info':
