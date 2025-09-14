@@ -233,10 +233,12 @@ def display_search_llm_response(llm_response):
                 # 参照元のありかに応じて、適したアイコンを取得
                 icon = utils.get_source_icon(sub_choice['source'])
                 # ページ番号が取得できない場合のための分岐処理
+                # ページ番号がある場合は必ず渡す
+                page_number = sub_choice['page_number'] if 'page_number' in sub_choice else None
                 display_file_with_page(
                     sub_choice['source'],
                     icon=icon,
-                    page_number=sub_choice.get('page_number'),
+                    page_number=page_number,
                     style='info'
                 )
         
