@@ -256,23 +256,25 @@ def get_llm_response(chat_message):
     )
 
     # LLMへのリクエストとレスポンス取得
-    # st.write("[get_llm_response] before chain.invoke")
-    st.write(f"chat_message: {chat_message}")
-    st.write(f"chat_history len: {len(chat_history)}")
-    st.write(f"chat_history sample: {chat_history[:2]}")
-    if hasattr(st.session_state, 'retriever') and hasattr(st.session_state.retriever, 'docs'):
-        st.write(f"context docs len: {len(st.session_state.retriever.docs)}")
-        st.write(f"context docs sample: {st.session_state.retriever.docs[:1]}")
+    if 'DEBUG' in globals() and DEBUG:
+        st.write(f"chat_message: {chat_message}")
+        st.write(f"chat_history len: {len(chat_history)}")
+        st.write(f"chat_history sample: {chat_history[:2]}")
+        if hasattr(st.session_state, 'retriever') and hasattr(st.session_state.retriever, 'docs'):
+            st.write(f"context docs len: {len(st.session_state.retriever.docs)}")
+            st.write(f"context docs sample: {st.session_state.retriever.docs[:1]}")
     import traceback
     llm_response = crash_report(
         "rag_chain.invoke",
         lambda: rag_chain.invoke({"input": chat_message, "chat_history": chat_history})
     )
-    st.write(f"[get_llm_response] llm_response: {llm_response}")
+    if 'DEBUG' in globals() and DEBUG:
+        st.write(f"[get_llm_response] llm_response: {llm_response}")
     # LLMレスポンスを会話履歴に追加（st.session_state.chat_historyはrole/content形式で管理）
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
     st.session_state.chat_history.append(("user", chat_message))
     st.session_state.chat_history.append(("assistant", llm_response["answer"]))
-    st.write("[get_llm_response] before return")
+    if 'DEBUG' in globals() and DEBUG:
+        st.write("[get_llm_response] before return")
     return llm_response
