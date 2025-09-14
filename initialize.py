@@ -115,6 +115,7 @@ def initialize_retriever():
     
     # RAGの参照先となるデータソースの読み込み
     docs_all = load_data_sources()
+    st.session_state.docs_all = docs_all
 
     # OSがWindowsの場合、Unicode正規化と、cp932（Windows用の文字コード）で表現できない文字を除去
     for doc in docs_all:
