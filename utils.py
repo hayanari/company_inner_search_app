@@ -136,7 +136,6 @@ def get_llm_response(chat_message):
     except Exception as e:
         st.write(f"promptチェック例外: {e}")
         print(f"promptチェック例外: {e}")
-    return
     # create_history_aware_retriever呼び出しを一時的にコメントアウト
     try:
         st.write(f"llm type: {type(llm)}")
