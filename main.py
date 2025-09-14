@@ -121,7 +121,7 @@ if user_text is not None and str(user_text).strip() != "":
     else:
         st.write("docs_all not in session_state")
     try:
-        keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=3)
+        keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=5)
     except Exception as e:
         logger.warning(f"全文検索エラー: {e}")
         keyword_results = []
