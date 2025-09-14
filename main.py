@@ -41,6 +41,14 @@ import constants as ct
 ############################################################
 logger = logging.getLogger(ct.LOGGER_NAME)
 
+# ==== debug flag ====
+import os
+DEBUG = os.getenv("APP_DEBUG", "0") == "1"
+logger.setLevel(logging.DEBUG if DEBUG else logging.WARNING)
+def dlog(msg):
+    if DEBUG:
+        logger.debug(msg)  # 端末ログにだけ出す（画面には出ない）
+
 ############################################################
 # 5. st.session_state 初期化
 ############################################################
@@ -111,74 +119,55 @@ if user_text is not None and str(user_text).strip() != "":
 
     # 10-2. 全文検索（キーワード一致）
     keyword_results = []
-    if "docs_all" in st.session_state:
-        # st.write(f"docs_all type: {type(st.session_state.docs_all)}")
-        if st.session_state.docs_all is not None:
-            # st.write(f"docs_all len: {len(st.session_state.docs_all)}")
-            # st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
-            pass
-        else:
-            # st.write("docs_all is None")
-            pass
-    else:
-        # st.write("docs_all not in session_state")
-        pass
     try:
-        keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=ct.MAX_KEYWORD_RESULTS)
+        keyword_results = utils.search_documents_by_keyword(
+            user_text, st.session_state.get("docs_all"), max_results=ct.MAX_KEYWORD_RESULTS
+        )
+        dlog(f"keyword_results: {len(keyword_results)}")
     except Exception as e:
         logger.warning(f"全文検索エラー: {e}")
         keyword_results = []
 
     # 10-3. LLMからの回答取得（RAG）
-
-    res_box = st.empty()
     try:
-    # st.write("before get_llm_response")
-    # st.write("call get_llm_response")
         llm_response = utils.get_llm_response(user_text)
-    # st.write("after get_llm_response")
+        dlog(f"llm_response type: {type(llm_response)}")
     except Exception:
-    # st.write("llm_response error, fallback to fixed list")
+        logger.exception("get_llm_response failed; fallback to fixed list")
         utils.render_hr_list_fixed()
         llm_response = None
 
-    with st.spinner(ct.SPINNER_TEXT):
-        try:
-            # RAGの回答が空/該当なしならフォールバック
-            answer = ""
-            if llm_response is None:
-                # st.write("llm_response is None or empty")
-                utils.render_hr_list_fixed()
-            elif isinstance(llm_response, dict):
-                answer = llm_response.get("answer", "")
-                if not answer.strip() or ("該当" in answer and "なし" in answer):
-                    # st.write("llm_response is empty or no match")
-                    utils.render_hr_list_fixed()
-                else:
-                    st.code(answer)
-            else:
-                st.code(str(llm_response))
-        except Exception as e:
-            pass
+    # 10-4. 回答表示
+    try:
+        has_keyword = bool(keyword_results)
+        has_rag = False
+        if st.session_state.mode == ct.ANSWER_MODE_1:
+            content = cn.display_search_llm_response(llm_response)
+        elif st.session_state.mode == ct.ANSWER_MODE_2:
+            content = cn.display_contact_llm_response(llm_response)
+        else:
+            content = cn.display_search_llm_response(llm_response)
+        # contentがdict型の場合はstr型に変換してからstrip()
+        content_str = content if isinstance(content, str) else str(content)
+        has_rag = bool(content_str and str(content_str).strip())
+
+        if has_keyword:
+            st.markdown("#### 🔍 キーワード一致による全文検索結果")
+            for doc in keyword_results:
+                st.expander(f"{doc.metadata.get('source', '')}").write(doc.page_content)
+
+        if has_rag:
+            st.markdown("#### 🤖 AIによる要約・回答")
+            st.markdown(content_str)
+        if not has_keyword and not has_rag:
+            st.warning("入力内容と関連する社内文書・AI回答が見つかりませんでした。入力内容を変更してください。", icon="⚠️")
+            content = "入力内容と関連する社内文書・AI回答が見つかりませんでした。"
+        logger.info({"message": content, "application_mode": st.session_state.mode})
+    except Exception as e:
+        import traceback
+        tb_str = traceback.format_exc()
+        logger.error(f"{ct.DISP_ANSWER_ERROR_MESSAGE}\n{e}\n{tb_str}")
             # 以下はpassの後にインデントを下げてexceptブロック内に配置
-            import traceback, os
-            logger.exception(e)
-            tb_str = traceback.format_exc()
-            debug_on = os.getenv("APP_DEBUG", "0") == "1"
-            if debug_on:
-                with st.expander("エラー詳細（開発者向け）", expanded=True):
-                    st.code(f"{type(e).__name__}: {e}\n\n{tb_str}")
-                    key = os.getenv("OPENAI_API_KEY", "")
-                    masked = (key[:5] + "..." + key[-4:]) if key else "(未設定)"
-                    # st.write("OPENAI_API_KEY:", masked)
-                    # st.write("OPENAI_API_KEY2 存在:", "OPENAI_API_KEY2" in os.environ)
-                    try:
-                        import openai
-                        # st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
-                    except Exception as imp_err:
-                        st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
-                        pass
-                        # st.write("openai import error:", str(imp_err))
             st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
             # st.write("traceback:")
             # st.write(traceback.format_exc())
