@@ -91,6 +91,7 @@ def get_llm_response(chat_message):
     st.write("before llm init")
     llm = ChatOpenAI(model_name=ct.MODEL, temperature=ct.TEMPERATURE)
     st.write("after llm init")
+    st.write("checkpoint: after llm init")
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのプロンプトテンプレートを作成
     question_generator_template = ct.SYSTEM_PROMPT_CREATE_INDEPENDENT_TEXT
@@ -120,6 +121,35 @@ def get_llm_response(chat_message):
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのRetrieverを作成
     st.write("before history_aware_retriever init")
+    print("before history_aware_retriever init")
+    st.write(f"llm is None: {llm is None}")
+    print(f"llm is None: {llm is None}")
+    st.write(f"retriever is None: {retriever is None}")
+    print(f"retriever is None: {retriever is None}")
+    st.write(f"question_generator_prompt is None: {question_generator_prompt is None}")
+    print(f"question_generator_prompt is None: {question_generator_prompt is None}")
+    return
+    # create_history_aware_retriever呼び出しを一時的にコメントアウト
+    try:
+        st.write(f"llm type: {type(llm)}")
+        st.write(f"llm repr: {repr(llm)[:1000]}")
+    except Exception as e:
+        st.write(f"llm情報取得例外: {e}")
+    try:
+        st.write(f"retriever type: {type(retriever)}")
+        st.write(f"retriever repr: {repr(retriever)[:1000]}")
+    except Exception as e:
+        st.write(f"retriever情報取得例外: {e}")
+    try:
+        st.write(f"question_generator_prompt type: {type(question_generator_prompt)}")
+        st.write(f"question_generator_prompt repr: {repr(question_generator_prompt)[:1000]}")
+    except Exception as e:
+        st.write(f"prompt情報取得例外: {e}")
+    st.stop()
+    st.write(f"retriever type: {type(st.session_state.retriever)}")
+    st.write(f"retriever sample: {str(st.session_state.retriever)[:300]}")
+    st.write(f"question_generator_prompt type: {type(question_generator_prompt)}")
+    st.write(f"question_generator_prompt sample: {str(question_generator_prompt)[:300]}")
     history_aware_retriever = create_history_aware_retriever(
         llm, st.session_state.retriever, question_generator_prompt
     )
