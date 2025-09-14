@@ -122,6 +122,9 @@ if user_text is not None and str(user_text).strip() != "":
         st.write("docs_all not in session_state")
     try:
         keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=ct.MAX_KEYWORD_RESULTS)
+            # --- デバッグ: 各ドキュメントのmetadataを出力 ---
+            if keyword_results:
+                st.write("[DEBUG] keyword_results metadata sample:", keyword_results[0].metadata)
     except Exception as e:
         logger.warning(f"全文検索エラー: {e}")
         keyword_results = []
@@ -134,6 +137,9 @@ if user_text is not None and str(user_text).strip() != "":
         st.write("call get_llm_response")
         llm_response = utils.get_llm_response(user_text)
         st.write("after get_llm_response")
+            # --- デバッグ: LLMレスポンスのcontext内metadataを出力 ---
+            if llm_response and isinstance(llm_response, dict) and "context" in llm_response and llm_response["context"]:
+                st.write("[DEBUG] llm_response context[0] metadata:", llm_response["context"][0].metadata)
     except Exception:
         st.write("llm_response error, fallback to fixed list")
         utils.render_hr_list_fixed()
