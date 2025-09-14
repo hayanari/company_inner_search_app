@@ -137,22 +137,7 @@ def get_llm_response(chat_message):
         st.write(f"promptチェック例外: {e}")
         print(f"promptチェック例外: {e}")
     # create_history_aware_retriever呼び出しを一時的にコメントアウト
-    try:
-        st.write(f"llm type: {type(llm)}")
-        st.write(f"llm repr: {repr(llm)[:1000]}")
-    except Exception as e:
-        st.write(f"llm情報取得例外: {e}")
-    try:
-        st.write(f"retriever type: {type(st.session_state.retriever)}")
-        st.write(f"retriever repr: {repr(st.session_state.retriever)[:1000]}")
-    except Exception as e:
-        st.write(f"retriever情報取得例外: {e}")
-    try:
-        st.write(f"question_generator_prompt type: {type(question_generator_prompt)}")
-        st.write(f"question_generator_prompt repr: {repr(question_generator_prompt)[:1000]}")
-    except Exception as e:
-        st.write(f"prompt情報取得例外: {e}")
-    st.stop()
+    # デバッグ出力はここまで、本処理を有効化
     st.write(f"retriever type: {type(st.session_state.retriever)}")
     st.write(f"retriever sample: {str(st.session_state.retriever)[:300]}")
     st.write(f"question_generator_prompt type: {type(question_generator_prompt)}")
