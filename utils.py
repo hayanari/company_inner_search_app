@@ -125,8 +125,8 @@ def get_llm_response(chat_message):
     st.write(f"llm is None: {llm is None}")
     print(f"llm is None: {llm is None}")
     try:
-        st.write(f"retriever is None: {retriever is None}")
-        print(f"retriever is None: {retriever is None}")
+        st.write(f"retriever is None: {st.session_state.retriever is None}")
+        print(f"retriever is None: {st.session_state.retriever is None}")
     except Exception as e:
         st.write(f"retrieverチェック例外: {e}")
         print(f"retrieverチェック例外: {e}")
