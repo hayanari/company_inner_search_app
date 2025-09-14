@@ -307,8 +307,13 @@ def display_contact_llm_response(llm_response):
             if file_path in file_path_list:
                 continue
 
-            # ページ番号が取得できた場合のみ、ページ番号を表示（ドキュメントによっては取得できない場合がある）
             page_number = document.metadata["page"] if "page" in document.metadata else None
+            if "page" in document.metadata:
+                # 「ファイルパス」と「ページ番号」
+                file_info = f"{file_path}（ページNo.{page_number+1}）"
+            else:
+                # 「ファイルパス」のみ
+                file_info = f"{file_path}"
             icon = utils.get_source_icon(file_path)
             display_file_with_page(file_path, icon=icon, page_number=page_number, style='info')
 
