@@ -10,6 +10,19 @@ CHUNK_OVERLAP = 50
 ############################################################
 from langchain_community.document_loaders import PyMuPDFLoader, Docx2txtLoader, TextLoader
 from langchain_community.document_loaders.csv_loader import CSVLoader
+from typing import Callable, Dict, Type
+
+# --- 拡張子ごとのローダー定義（拡張性・型ヒント付き） ---
+def csv_loader_utf8(path: str):
+    """UTF-8エンコーディングでCSVをロード"""
+    return CSVLoader(path, encoding="utf-8")
+
+SUPPORTED_EXTENSIONS: Dict[str, Callable] = {
+    ".pdf": PyMuPDFLoader,
+    ".docx": Docx2txtLoader,
+    ".csv": csv_loader_utf8,
+    ".txt": TextLoader
+}
 
 
 ############################################################

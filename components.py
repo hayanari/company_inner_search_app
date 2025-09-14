@@ -1,3 +1,40 @@
+def display_file_with_page(file_path, icon=None, page_number=None, style='success'):
+    """
+    ファイルパス＋ページ番号を一貫したUIで表示
+    style: 'success'|'info'|'markdown'
+    """
+    label = f"{file_path}"
+    if page_number is not None:
+        label += f"（ページNo.{page_number}")
+    if style == 'success':
+        st.success(label, icon=icon)
+    elif style == 'info':
+        st.info(label, icon=icon)
+    else:
+        st.markdown(label)
+def display_sidebar():
+    """
+    サイドバーUI（利用目的・説明・入力例）
+    """
+    st.sidebar.title("利用目的")
+    purpose = st.sidebar.radio("", ["社内文書検索", "社内問い合わせ"])
+    st.sidebar.markdown("""
+    <div style='margin-bottom: 1em;'></div>
+    <b>【「社内文書検索」を選択した場合】</b>
+    <div style='background:#f5f7fa;padding:8px;border-radius:6px;margin-bottom:0.5em;'>
+    入力内容と関連性が高い社内文書のありかを検索できます。
+    </div>
+    <b>【入力例】</b><br>
+    社員の育成方針に関するMTGの議事録
+    <div style='margin-bottom: 1em;'></div>
+    <b>【「社内問い合わせ」を選択した場合】</b>
+    <div style='background:#f5f7fa;padding:8px;border-radius:6px;margin-bottom:0.5em;'>
+    質問・要望に対して、社内文書の情報をもとに回答を得られます。
+    </div>
+    <b>【入力例】</b><br>
+    人事部に所属している従業員情報を一覧化して
+    """, unsafe_allow_html=True)
+    return purpose
 """
 このファイルは、画面表示に特化した関数定義のファイルです。
 """
@@ -159,13 +196,10 @@ def display_search_llm_response(llm_response):
         icon = utils.get_source_icon(main_file_path)
         # ページ番号が取得できた場合のみ、ページ番号を表示（ドキュメントによっては取得できない場合がある）
         if "page" in llm_response["context"][0].metadata:
-            # ページ番号を取得
             main_page_number = llm_response["context"][0].metadata["page"]
-            # 「メインドキュメントのファイルパス」と「ページ番号」を表示
-            st.success(f"{main_file_path}", icon=icon)
         else:
-            # 「メインドキュメントのファイルパス」を表示
-            st.success(f"{main_file_path}", icon=icon)
+            main_page_number = None
+        display_file_with_page(main_file_path, icon=icon, page_number=main_page_number, style='success')
 
         # ==========================================
         # ユーザー入力値と関連性が高いサブドキュメントのありかを表示
@@ -216,12 +250,12 @@ def display_search_llm_response(llm_response):
                 # 参照元のありかに応じて、適したアイコンを取得
                 icon = utils.get_source_icon(sub_choice['source'])
                 # ページ番号が取得できない場合のための分岐処理
-                if "page_number" in sub_choice:
-                    # 「サブドキュメントのファイルパス」と「ページ番号」を表示
-                    st.info(f"{sub_choice['source']}", icon=icon)
-                else:
-                    # 「サブドキュメントのファイルパス」を表示
-                    st.info(f"{sub_choice['source']}", icon=icon)
+                display_file_with_page(
+                    sub_choice['source'],
+                    icon=icon,
+                    page_number=sub_choice.get('page_number'),
+                    style='info'
+                )
         
         # 表示用の会話ログに格納するためのデータを用意
         # - 「mode」: モード（「社内文書検索」or「社内問い合わせ」）
@@ -295,19 +329,9 @@ def display_contact_llm_response(llm_response):
                 continue
 
             # ページ番号が取得できた場合のみ、ページ番号を表示（ドキュメントによっては取得できない場合がある）
-            if "page" in document.metadata:
-                # ページ番号を取得
-                page_number = document.metadata["page"]
-                # 「ファイルパス」と「ページ番号」
-                file_info = f"{file_path}"
-            else:
-                # 「ファイルパス」のみ
-                file_info = f"{file_path}"
-
-            # 参照元のありかに応じて、適したアイコンを取得
+            page_number = document.metadata["page"] if "page" in document.metadata else None
             icon = utils.get_source_icon(file_path)
-            # ファイル情報を表示
-            st.info(file_info, icon=icon)
+            display_file_with_page(file_path, icon=icon, page_number=page_number, style='info')
 
             # 重複チェック用に、ファイルパスをリストに順次追加
             file_path_list.append(file_path)
