@@ -112,22 +112,16 @@ if user_text is not None and str(user_text).strip() != "":
     # 10-2. 全文検索（キーワード一致）
     keyword_results = []
     if "docs_all" in st.session_state:
-        # st.write(f"docs_all type: {type(st.session_state.docs_all)}")
+        st.write(f"docs_all type: {type(st.session_state.docs_all)}")
         if st.session_state.docs_all is not None:
-            # st.write(f"docs_all len: {len(st.session_state.docs_all)}")
-            # st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
-            pass
+            st.write(f"docs_all len: {len(st.session_state.docs_all)}")
+            st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
         else:
-            # st.write("docs_all is None")
-            pass
+            st.write("docs_all is None")
     else:
-        # st.write("docs_all not in session_state")
-        pass
+        st.write("docs_all not in session_state")
     try:
-    keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=ct.MAX_KEYWORD_RESULTS)
-    # --- デバッグ: 各ドキュメントのmetadataを出力 ---
-    # if keyword_results:
-    #     st.write("[DEBUG] keyword_results metadata sample:", keyword_results[0].metadata)
+        keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=ct.MAX_KEYWORD_RESULTS)
     except Exception as e:
         logger.warning(f"全文検索エラー: {e}")
         keyword_results = []
@@ -136,15 +130,12 @@ if user_text is not None and str(user_text).strip() != "":
 
     res_box = st.empty()
     try:
-    # st.write("before get_llm_response")
-    # st.write("call get_llm_response")
-    llm_response = utils.get_llm_response(user_text)
-    # st.write("after get_llm_response")
-    # --- デバッグ: LLMレスポンスのcontext内metadataを出力 ---
-    # if llm_response and isinstance(llm_response, dict) and "context" in llm_response and llm_response["context"]:
-    #     st.write("[DEBUG] llm_response context[0] metadata:", llm_response["context"][0].metadata)
+        st.write("before get_llm_response")
+        st.write("call get_llm_response")
+        llm_response = utils.get_llm_response(user_text)
+        st.write("after get_llm_response")
     except Exception:
-    # st.write("llm_response error, fallback to fixed list")
+        st.write("llm_response error, fallback to fixed list")
         utils.render_hr_list_fixed()
         llm_response = None
 
@@ -153,12 +144,12 @@ if user_text is not None and str(user_text).strip() != "":
             # RAGの回答が空/該当なしならフォールバック
             answer = ""
             if llm_response is None:
-                # st.write("llm_response is None or empty")
+                st.write("llm_response is None or empty")
                 utils.render_hr_list_fixed()
             elif isinstance(llm_response, dict):
                 answer = llm_response.get("answer", "")
                 if not answer.strip() or ("該当" in answer and "なし" in answer):
-                    # st.write("llm_response is empty or no match")
+                    st.write("llm_response is empty or no match")
                     utils.render_hr_list_fixed()
                 else:
                     st.code(answer)
