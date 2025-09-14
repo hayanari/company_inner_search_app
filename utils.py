@@ -1,3 +1,55 @@
+import glob
+import pandas as pd
+import streamlit as st
+def load_all_staff_csv():
+    dfs = []
+    for path in glob.glob("./data/社員について/*.csv"):
+        try:
+            df = pd.read_csv(path)
+            df["__source"] = path
+            dfs.append(df)
+        except Exception:
+            pass
+    return pd.concat(dfs, ignore_index=True) if dfs else pd.DataFrame()
+
+def render_hr_list_fixed():
+    df_all = load_all_staff_csv()
+    if df_all.empty:
+        st.warning("社員名簿CSVを読み込めませんでした。パスや権限を確認してください。")
+        return None
+
+    rename_map = {
+        "氏名（フルネーム）": "氏名",
+        "メールアドレス": "メール",
+    }
+    df_all = df_all.rename(columns=rename_map)
+
+    candidates = [c for c in df_all.columns if "部署" in c]
+    dept_col = candidates[0] if candidates else None
+    if not dept_col:
+        st.warning("CSVに『部署』列が見つかりませんでした。列名をご確認ください。")
+        return None
+
+    df_hr = (
+        df_all[df_all[dept_col] == "人事部"]
+        .copy()
+    )
+
+    cols = [c for c in ["社員ID", "氏名", "部署", "役職", "メール", "__source"] if c in df_hr.columns]
+    df_hr = df_hr[cols].drop_duplicates()
+
+    st.write("### 人事部に所属している従業員一覧（フォールバック抽出）")
+    if df_hr.empty:
+        st.info("人事部のレコードが見つかりませんでした。CSVの内容をご確認ください。")
+    else:
+        st.dataframe(df_hr, use_container_width=True)
+        st.download_button(
+            "CSVをダウンロード",
+            df_hr.to_csv(index=False),
+            "hr_members.csv",
+            "text/csv"
+        )
+    return df_hr
 def crash_report(label, fn):
     import streamlit as st, traceback
     st.write(f"checkpoint: {label}")
