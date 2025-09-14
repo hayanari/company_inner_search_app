@@ -171,29 +171,25 @@ def get_llm_response(chat_message):
     st.write("checkpoint: after llm init")
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのプロンプトテンプレートを作成
-    question_generator_template = ct.SYSTEM_PROMPT_CREATE_INDEPENDENT_TEXT
-    question_generator_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", question_generator_template),
-            MessagesPlaceholder("chat_history"),
-            ("human", "{input}")
-        ]
+    # LangChain公式推奨の配線でプロンプトを作成
+    from langchain_core.prompts import ChatPromptTemplate
+    question_generator_prompt = crash_report(
+        "question_generator_prompt",
+        lambda: ChatPromptTemplate.from_messages([
+            ("system", ct.SYSTEM_PROMPT_CREATE_INDEPENDENT_TEXT),
+            ("human", "履歴: {chat_history}\n質問: {input}\n人事関連の同義語も考慮して検索クエリを作成してください。")
+        ])
     )
-
-    # モードによってLLMから回答を取得する用のプロンプトを変更
     if st.session_state.mode == ct.ANSWER_MODE_1:
-        # モードが「社内文書検索」の場合のプロンプト
         question_answer_template = ct.SYSTEM_PROMPT_DOC_SEARCH
     else:
-        # モードが「社内問い合わせ」の場合のプロンプト
         question_answer_template = ct.SYSTEM_PROMPT_INQUIRY
-    # LLMから回答を取得する用のプロンプトテンプレートを作成
-    question_answer_prompt = ChatPromptTemplate.from_messages(
-        [
+    question_answer_prompt = crash_report(
+        "question_answer_prompt",
+        lambda: ChatPromptTemplate.from_messages([
             ("system", question_answer_template),
-            MessagesPlaceholder("chat_history"),
-            ("human", "{input}")
-        ]
+            ("human", "履歴: {chat_history}\n質問: {input}")
+        ])
     )
 
     # 会話履歴なしでもLLMに理解してもらえる、独立した入力テキストを取得するためのRetrieverを作成
