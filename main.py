@@ -159,6 +159,8 @@ if user_text is not None and str(user_text).strip() != "":
             else:
                 st.code(str(llm_response))
         except Exception as e:
+            pass
+            # 以下はpassの後にインデントを下げてexceptブロック内に配置
             import traceback, os
             logger.exception(e)
             tb_str = traceback.format_exc()
@@ -174,13 +176,12 @@ if user_text is not None and str(user_text).strip() != "":
                         import openai
                         # st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
                     except Exception as imp_err:
+                        st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+                        pass
                         # st.write("openai import error:", str(imp_err))
-                st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
-                # st.write("traceback:")
-                # st.write(traceback.format_exc())
-            else:
-                st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
-            pass
+            st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
+            # st.write("traceback:")
+            # st.write(traceback.format_exc())
             st.stop()
 
     # 10-4. アシスタントの回答表示（全文検索＋RAGハイブリッド）
