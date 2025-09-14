@@ -143,8 +143,8 @@ def get_llm_response(chat_message):
     except Exception as e:
         st.write(f"llm情報取得例外: {e}")
     try:
-        st.write(f"retriever type: {type(retriever)}")
-        st.write(f"retriever repr: {repr(retriever)[:1000]}")
+        st.write(f"retriever type: {type(st.session_state.retriever)}")
+        st.write(f"retriever repr: {repr(st.session_state.retriever)[:1000]}")
     except Exception as e:
         st.write(f"retriever情報取得例外: {e}")
     try:
