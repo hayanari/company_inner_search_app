@@ -1,3 +1,13 @@
+def crash_report(label, fn):
+    import streamlit as st, traceback
+    st.write(f"checkpoint: {label}")
+    try:
+        return fn()
+    except Exception as e:
+        st.error(f"[{label}] で例外発生")
+        st.code(str(e))
+        st.code("".join(traceback.format_exc()))
+        raise
 from typing import List
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 def search_documents_by_keyword(keyword, docs_all, max_results=10):
@@ -164,34 +174,38 @@ def get_llm_response(chat_message):
 
     # --- LangChain公式推奨の配線 ---
     from langchain_core.prompts import ChatPromptTemplate
-    # 1) 質問拡張用プロンプト（既存のまま）
-    question_generator_prompt = ChatPromptTemplate.from_messages([
-        ("system", "あなたは検索クエリを改善するアシスタントです。"),
-        ("human", "履歴: {chat_history}\n質問: {input}\n人事関連の同義語も考慮して検索クエリを作成してください。")
-    ])
-    # 2) 履歴対応リトリーバ
-    history_aware_retriever = create_history_aware_retriever(
-        llm=llm,
-        retriever=st.session_state.retriever,
-        prompt=question_generator_prompt
+    llm = crash_report("llm init", lambda: ChatOpenAI(model="gpt-4o-mini", temperature=0))
+    question_generator_prompt = crash_report(
+        "question_generator_prompt",
+        lambda: ChatPromptTemplate.from_messages([
+            ("system", "あなたは検索クエリを改善するアシスタントです。"),
+            ("human", "履歴: {chat_history}\n質問: {input}\n人事関連の同義語も考慮して検索クエリを作成してください。")
+        ])
     )
-    st.write("after history_aware_retriever init")
-    # 3) 答案生成プロンプト（人事部のみCSV出力）
-    answer_prompt = ChatPromptTemplate.from_messages([
-        ("system",
-         "あなたは人事データ抽出ボットです。以下の制約でCSVのみを出力：\n"
-         "- 列: 社員ID, 氏名, 部署, 役職, メール\n"
-         "- 部署が『人事部』のレコードのみ\n"
-         "- ヘッダ1行 + データ行\n"
-         "- 補完しない（不明は空欄）"),
-        ("human", "質問: {input}\n参照コンテキスト:\n{context}")
-    ])
-    st.write("before question_answer_chain init")
-    question_answer_chain = create_stuff_documents_chain(llm, answer_prompt)
-    st.write("after question_answer_chain init")
-    st.write("before chain init")
-    rag_chain = create_retrieval_chain(history_aware_retriever, question_answer_chain)
-    st.write("after chain init")
+    history_aware_retriever = crash_report(
+        "create_history_aware_retriever",
+        lambda: create_history_aware_retriever(llm=llm, retriever=st.session_state.retriever, prompt=question_generator_prompt)
+    )
+    answer_prompt = crash_report(
+        "answer_prompt",
+        lambda: ChatPromptTemplate.from_messages([
+            ("system",
+             "あなたは人事データ抽出ボットです。以下の制約でCSVのみを出力：\n"
+             "- 列: 社員ID, 氏名, 部署, 役職, メール\n"
+             "- 部署が『人事部』のレコードのみ\n"
+             "- ヘッダ1行 + データ行\n"
+             "- 補完しない（不明は空欄）"),
+            ("human", "質問: {input}\n参照コンテキスト:\n{context}")
+        ])
+    )
+    question_answer_chain = crash_report(
+        "create_stuff_documents_chain",
+        lambda: create_stuff_documents_chain(llm, answer_prompt)
+    )
+    rag_chain = crash_report(
+        "create_retrieval_chain",
+        lambda: create_retrieval_chain(history_aware_retriever, question_answer_chain)
+    )
 
     # LLMへのリクエストとレスポンス取得
     st.write("[get_llm_response] before chain.invoke")
@@ -202,15 +216,11 @@ def get_llm_response(chat_message):
         st.write(f"context docs len: {len(st.session_state.retriever.docs)}")
         st.write(f"context docs sample: {st.session_state.retriever.docs[:1]}")
     import traceback
-    try:
-        llm_response = rag_chain.invoke({"input": chat_message, "chat_history": chat_history})
-        st.write(f"[get_llm_response] llm_response: {llm_response}")
-    except Exception as e:
-        st.error("実行時エラーが発生しました。")
-        import traceback
-        st.code(str(e))
-        st.code("".join(traceback.format_exc()))
-        raise
+    llm_response = crash_report(
+        "rag_chain.invoke",
+        lambda: rag_chain.invoke({"input": chat_message, "chat_history": chat_history})
+    )
+    st.write(f"[get_llm_response] llm_response: {llm_response}")
     # LLMレスポンスを会話履歴に追加（st.session_state.chat_historyはrole/content形式で管理）
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
