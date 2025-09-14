@@ -204,7 +204,6 @@ if user_text is not None and str(user_text).strip() != "":
                 content = "入力内容と関連する社内文書・AI回答が見つかりませんでした。"
             logger.info({"message": content, "application_mode": st.session_state.mode})
         except Exception as e:
-            import traceback
             tb_str = traceback.format_exc()
             logger.error(f"{ct.DISP_ANSWER_ERROR_MESSAGE}\n{e}\n{tb_str}")
             st.error(f"エラー詳細:\n{type(e).__name__}: {e}\n\n{tb_str}", icon=ct.ERROR_ICON)
