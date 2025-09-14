@@ -1,3 +1,5 @@
+from typing import List
+from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 def search_documents_by_keyword(keyword, docs_all, max_results=10):
     """
     指定キーワードで全ドキュメントから部分一致検索し、ヒットしたものを返す
@@ -77,6 +79,19 @@ def build_error_message(message):
 
 
 def get_llm_response(chat_message):
+    def get_chat_history_from_session() -> List[BaseMessage]:
+        raw_hist = st.session_state.get("chat_history", [])
+        hist: List[BaseMessage] = []
+        for role, content in raw_hist:
+            if role == "user":
+                hist.append(HumanMessage(content=content))
+            else:
+                hist.append(AIMessage(content=content))
+        return hist
+
+    chat_history = get_chat_history_from_session()
+    st.write(f"chat_history len: {len(chat_history)}")
+    st.write(f"chat_history sample: {chat_history[:2]}")
     """
     LLMからの回答取得
 
@@ -158,21 +173,23 @@ def get_llm_response(chat_message):
     # LLMへのリクエストとレスポンス取得
     st.write("[get_llm_response] before chain.invoke")
     st.write(f"chat_message: {chat_message}")
-    st.write(f"chat_history len: {len(st.session_state.chat_history) if hasattr(st.session_state, 'chat_history') else 'N/A'}")
-    st.write(f"chat_history sample: {st.session_state.chat_history[:2] if hasattr(st.session_state, 'chat_history') else 'N/A'}")
+    st.write(f"chat_history len: {len(chat_history)}")
+    st.write(f"chat_history sample: {chat_history[:2]}")
     if hasattr(st.session_state, 'retriever') and hasattr(st.session_state.retriever, 'docs'):
         st.write(f"context docs len: {len(st.session_state.retriever.docs)}")
         st.write(f"context docs sample: {st.session_state.retriever.docs[:1]}")
-    st.stop()
     import traceback
     try:
-        llm_response = chain.invoke({"input": chat_message, "chat_history": st.session_state.chat_history})
+        llm_response = chain.invoke({"input": chat_message, "chat_history": chat_history})
         st.write(f"[get_llm_response] llm_response: {llm_response}")
     except Exception as e:
         st.write(f"[get_llm_response] chain.invoke error: {e}")
         st.write(traceback.format_exc())
         raise
-    # LLMレスポンスを会話履歴に追加
-    st.session_state.chat_history.extend([HumanMessage(content=chat_message), llm_response["answer"]])
+    # LLMレスポンスを会話履歴に追加（st.session_state.chat_historyはrole/content形式で管理）
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    st.session_state.chat_history.append(("user", chat_message))
+    st.session_state.chat_history.append(("assistant", llm_response["answer"]))
     st.write("[get_llm_response] before return")
     return llm_response
