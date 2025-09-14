@@ -64,8 +64,8 @@ except Exception as e:
     tb_str = traceback.format_exc()
     error_message = f"{ct.INITIALIZE_ERROR_MESSAGE}\n\n例外内容: {e}\n\n発生場所:\n{tb_str}"
     st.error(utils.build_error_message(error_message), icon=ct.ERROR_ICON)
-    st.write("traceback:")
-    st.write(traceback.format_exc())
+    # st.write("traceback:")
+    # st.write(traceback.format_exc())
     st.stop()
 
 if not st.session_state.initialized:
@@ -112,14 +112,17 @@ if user_text is not None and str(user_text).strip() != "":
     # 10-2. 全文検索（キーワード一致）
     keyword_results = []
     if "docs_all" in st.session_state:
-        st.write(f"docs_all type: {type(st.session_state.docs_all)}")
+        # st.write(f"docs_all type: {type(st.session_state.docs_all)}")
         if st.session_state.docs_all is not None:
-            st.write(f"docs_all len: {len(st.session_state.docs_all)}")
-            st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
+            # st.write(f"docs_all len: {len(st.session_state.docs_all)}")
+            # st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
+            pass
         else:
-            st.write("docs_all is None")
+            # st.write("docs_all is None")
+            pass
     else:
-        st.write("docs_all not in session_state")
+        # st.write("docs_all not in session_state")
+        pass
     try:
         keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=ct.MAX_KEYWORD_RESULTS)
     except Exception as e:
@@ -130,12 +133,12 @@ if user_text is not None and str(user_text).strip() != "":
 
     res_box = st.empty()
     try:
-        st.write("before get_llm_response")
-        st.write("call get_llm_response")
+    # st.write("before get_llm_response")
+    # st.write("call get_llm_response")
         llm_response = utils.get_llm_response(user_text)
-        st.write("after get_llm_response")
+    # st.write("after get_llm_response")
     except Exception:
-        st.write("llm_response error, fallback to fixed list")
+    # st.write("llm_response error, fallback to fixed list")
         utils.render_hr_list_fixed()
         llm_response = None
 
@@ -144,12 +147,12 @@ if user_text is not None and str(user_text).strip() != "":
             # RAGの回答が空/該当なしならフォールバック
             answer = ""
             if llm_response is None:
-                st.write("llm_response is None or empty")
+                # st.write("llm_response is None or empty")
                 utils.render_hr_list_fixed()
             elif isinstance(llm_response, dict):
                 answer = llm_response.get("answer", "")
                 if not answer.strip() or ("該当" in answer and "なし" in answer):
-                    st.write("llm_response is empty or no match")
+                    # st.write("llm_response is empty or no match")
                     utils.render_hr_list_fixed()
                 else:
                     st.code(answer)
@@ -165,16 +168,18 @@ if user_text is not None and str(user_text).strip() != "":
                     st.code(f"{type(e).__name__}: {e}\n\n{tb_str}")
                     key = os.getenv("OPENAI_API_KEY", "")
                     masked = (key[:5] + "..." + key[-4:]) if key else "(未設定)"
-                    st.write("OPENAI_API_KEY:", masked)
-                    st.write("OPENAI_API_KEY2 存在:", "OPENAI_API_KEY2" in os.environ)
+                    # st.write("OPENAI_API_KEY:", masked)
+                    # st.write("OPENAI_API_KEY2 存在:", "OPENAI_API_KEY2" in os.environ)
                     try:
                         import openai
-                        st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
+                        # st.write("openai.__version__:", getattr(openai, "__version__", "unknown"))
                     except Exception as imp_err:
-                        st.write("openai import error:", str(imp_err))
+                        # st.write("openai import error:", str(imp_err))
                 st.error(utils.build_error_message(ct.GET_LLM_RESPONSE_ERROR_MESSAGE), icon=ct.ERROR_ICON)
-                st.write("traceback:")
-                st.write(traceback.format_exc())
+                # st.write("traceback:")
+                # st.write(traceback.format_exc())
+            else:
+                pass
             st.stop()
 
     # 10-4. アシスタントの回答表示（全文検索＋RAGハイブリッド）
