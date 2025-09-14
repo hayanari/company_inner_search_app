@@ -124,10 +124,18 @@ def get_llm_response(chat_message):
     print("before history_aware_retriever init")
     st.write(f"llm is None: {llm is None}")
     print(f"llm is None: {llm is None}")
-    st.write(f"retriever is None: {retriever is None}")
-    print(f"retriever is None: {retriever is None}")
-    st.write(f"question_generator_prompt is None: {question_generator_prompt is None}")
-    print(f"question_generator_prompt is None: {question_generator_prompt is None}")
+    try:
+        st.write(f"retriever is None: {retriever is None}")
+        print(f"retriever is None: {retriever is None}")
+    except Exception as e:
+        st.write(f"retrieverチェック例外: {e}")
+        print(f"retrieverチェック例外: {e}")
+    try:
+        st.write(f"question_generator_prompt is None: {question_generator_prompt is None}")
+        print(f"question_generator_prompt is None: {question_generator_prompt is None}")
+    except Exception as e:
+        st.write(f"promptチェック例外: {e}")
+        print(f"promptチェック例外: {e}")
     return
     # create_history_aware_retriever呼び出しを一時的にコメントアウト
     try:
