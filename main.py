@@ -111,12 +111,15 @@ if user_text is not None and str(user_text).strip() != "":
 
     # 10-2. 全文検索（キーワード一致）
     keyword_results = []
-    st.write(f"docs_all type: {type(st.session_state.docs_all)}")
-    if st.session_state.docs_all is not None:
-        st.write(f"docs_all len: {len(st.session_state.docs_all)}")
-        st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
+    if "docs_all" in st.session_state:
+        st.write(f"docs_all type: {type(st.session_state.docs_all)}")
+        if st.session_state.docs_all is not None:
+            st.write(f"docs_all len: {len(st.session_state.docs_all)}")
+            st.write(f"docs_all sample: {st.session_state.docs_all[:1]}")
+        else:
+            st.write("docs_all is None")
     else:
-        st.write("docs_all is None")
+        st.write("docs_all not in session_state")
     try:
         keyword_results = utils.search_documents_by_keyword(user_text, st.session_state.docs_all, max_results=3)
     except Exception as e:
